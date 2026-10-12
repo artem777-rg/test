@@ -3158,7 +3158,19 @@ function renderPublicTasks() {
             action = `<button class="btn btn-primary" type="button" data-book-task="${escapeHtml(task.id)}">Забронировать</button>`;
         }
         const statusText = isFull ? "Набор закрыт" : `Свободно мест: ${Math.max(0, capacity - bookedCount)}`;
-        return `<article class="resident-task-item"><div class="resident-task-info"><div class="resident-task-title">${escapeHtml(task.title)}</div><div>${escapeHtml(task.details || "")}</div><div class="resident-task-meta"><span>⏱ ${escapeHtml(formatHours(task.hours))} ч. каждому</span><span>📅 ${escapeHtml(dueText)}</span><span>👥 ${bookedCount}/${capacity}</span><span class="task-status ${isFull ? 'booked' : ''}">${statusText}</span></div></div><div class="task-actions">${action}</div></article>`;
+        // Администратору показываем, какие именно жильцы забронировали задание.
+        const bookedResidents = isAdmin && Array.isArray(task.bookings)
+            ? task.bookings.map(booking => {
+                const resident = students.find(student => String(student.id) === String(booking.resident_id));
+                if (!resident) return `Жилец (ID: ${String(booking.resident_id).slice(0, 8)}…)`;
+                const room = resident.room ? ` · комната ${resident.room}` : "";
+                return `${resident.full_name || resident.nickname || "Жилец"}${room}`;
+            })
+            : [];
+        const bookedResidentsMarkup = isAdmin && bookedResidents.length
+            ? `<div class="task-booked-residents"><strong>Кто забронировал:</strong><ul>${bookedResidents.map(name => `<li>${escapeHtml(name)}</li>`).join("")}</ul></div>`
+            : (isAdmin ? '<div class="task-booked-residents task-booked-residents-empty">Пока никто не забронировал</div>' : "");
+        return `<article class="resident-task-item"><div class="resident-task-info"><div class="resident-task-title">${escapeHtml(task.title)}</div><div>${escapeHtml(task.details || "")}</div><div class="resident-task-meta"><span>⏱ ${escapeHtml(formatHours(task.hours))} ч. каждому</span><span>📅 ${escapeHtml(dueText)}</span><span>👥 ${bookedCount}/${capacity}</span><span class="task-status ${isFull ? 'booked' : ''}">${statusText}</span></div>${bookedResidentsMarkup}</div><div class="task-actions">${action}</div></article>`;
     }).join("");
 }
 
