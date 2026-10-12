@@ -2163,18 +2163,15 @@ body.theme-rose .resident-task-card {
 }
 
 
-/* Единая кнопка мобильных разделов жильца с раскрывающимся меню */
+/* Единая мобильная панель с тремя кнопками-переключателями */
 .resident-mobile-nav{display:none}
 @media(max-width:600px){
-  .resident-mobile-nav{display:block;width:100%;box-sizing:border-box;grid-column:1/-1;position:sticky;top:calc(var(--mobile-header-height, 78px) + 8px);z-index:20;margin:0 0 4px}
-  .resident-mobile-nav-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:46px;padding:10px 14px;border:1px solid var(--border-color,rgba(140,155,190,.25));border-radius:13px;background:var(--card-bg,var(--panel-bg,rgba(20,28,50,.96)));color:var(--text-color,inherit);font:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.08);backdrop-filter:blur(12px)}
-  .resident-mobile-nav-trigger[aria-expanded="true"]{border-color:var(--accent-color,#526de5)}
-  .resident-mobile-nav-options{display:grid;grid-template-columns:1fr;gap:5px;margin-top:6px;padding:6px;border:1px solid var(--border-color,rgba(140,155,190,.25));border-radius:14px;background:var(--card-bg,var(--panel-bg,rgba(20,28,50,.98)));box-shadow:0 10px 24px rgba(0,0,0,.14)}
-  .resident-mobile-nav-btn{display:block;width:100%;min-width:0;min-height:44px;padding:10px 12px;text-align:left;border:0;border-radius:10px;background:transparent;color:var(--text-color,inherit);font:inherit;font-size:13px;font-weight:750;line-height:1.25;cursor:pointer}
-  .resident-mobile-nav-btn.active{background:var(--accent-color,#526de5);color:#fff}
+  .resident-mobile-nav{display:block;width:100%;box-sizing:border-box;grid-column:1/-1;position:relative;z-index:10;margin:0 0 4px}
+  .resident-mobile-nav-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;width:100%;box-sizing:border-box;padding:7px;border:1px solid var(--border-color,rgba(140,155,190,.25));border-radius:15px;background:var(--card-bg,var(--panel-bg,rgba(20,28,50,.98)));box-shadow:0 6px 16px rgba(0,0,0,.08)}
+  .resident-mobile-nav-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;min-width:0;min-height:48px;padding:9px 5px;text-align:center;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text-color,inherit);font:inherit;font-size:12px;font-weight:800;line-height:1.2;cursor:pointer;overflow-wrap:anywhere}
+  .resident-mobile-nav-btn.active{background:var(--accent-color,#526de5);color:#fff;box-shadow:0 3px 9px rgba(0,0,0,.12)}
   .resident-workspace[data-mobile-view="notifications"]>.tasks-card,.resident-workspace[data-mobile-view="notifications"]>.achievements-launcher-card{display:none!important}
   .resident-workspace[data-mobile-view="tasks"]>.notifications-card,.resident-workspace[data-mobile-view="tasks"]>.achievements-launcher-card{display:none!important}
   .resident-workspace[data-mobile-view="achievements"]>.workspace-card{display:none!important}
   .resident-workspace[data-mobile-view="achievements"]>.achievements-launcher-card{display:none!important}
 }
-
