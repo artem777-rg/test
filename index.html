@@ -208,6 +208,7 @@
                             <button type="button" class="resident-mobile-nav-btn active" data-mobile-view="notifications" aria-pressed="true">🔔 Уведомления</button>
                             <button type="button" class="resident-mobile-nav-btn" data-mobile-view="tasks" aria-pressed="false">🧰 Бронирование</button>
                             <button type="button" class="resident-mobile-nav-btn" data-mobile-view="achievements" aria-pressed="false">🏅 Достижения</button>
+                            <button type="button" class="resident-mobile-nav-btn resident-mobile-collapse-btn" id="residentMobileCollapseBtn" aria-expanded="true">↕ Свернуть</button>
                         </div>
                     </nav>
                     <div class="workspace-card notifications-card">
@@ -215,8 +216,8 @@
                             <div><h2>🔔 Уведомления</h2><p>Уведомления сайта и подключение Telegram</p></div>
                         </div>
                         <div class="notification-channel-tabs" role="tablist" aria-label="Каналы уведомлений">
-                            <button type="button" class="notification-channel-tab active" id="siteNotificationsTab" role="tab" aria-selected="true">🔔 На сайте</button>
                             <button type="button" class="notification-channel-tab" id="telegramNotificationsTab" role="tab" aria-selected="false">✈️ Telegram</button>
+                            <button type="button" class="notification-channel-tab active" id="siteNotificationsTab" role="tab" aria-selected="true">🔔 На сайте</button>
                         </div>
                         <div id="siteNotificationsPane" class="notification-channel-pane">
                             <div class="notification-pane-actions"><span class="muted">Назначения, списания часов и новости о заданиях</span><button id="markNotificationsRead" class="btn btn-secondary" type="button">Прочитать все</button></div>
@@ -250,7 +251,7 @@
             <!-- ЛИЧНАЯ СТАТИСТИКА ЖИЛЬЦА -->
             <section id="studentPersonalStats" class="student-stats-card hidden" aria-labelledby="studentStatsTitle">
                 <div class="student-stats-heading">
-                    <div><p class="student-stats-kicker">МОЯ СТАТИСТИКА</p><h2 id="studentStatsTitle">Моя статистика</h2><p>Твои часы за всё время и за текущий месяц</p></div>
+                    <div><h2 id="studentStatsTitle">Моя статистика</h2><p>Твои часы за всё время и за текущий месяц</p></div>
                     <div class="student-stats-icon">📊</div>
                 </div>
                 <div class="student-stats-grid">
