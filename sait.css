@@ -2445,3 +2445,61 @@ body.admin-tools-modal-open { overflow: hidden; }
   .global-ranking-card + .resident-workspace { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .global-ranking-card + .resident-workspace .achievements-launcher-card { grid-column: auto; }
 }
+
+/* Student-facing section tabs: one horizontal row below notifications and bookings. */
+.resident-top-data-tabs {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin: 14px 0 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.resident-top-data-tabs .data-tab {
+  flex: 1 0 max-content;
+  min-width: max-content;
+  white-space: nowrap;
+}
+@media (max-width: 680px) {
+  .resident-top-data-tabs { gap: 6px; padding-bottom: 5px; }
+  .resident-top-data-tabs .data-tab { flex: 0 0 auto; padding: 10px 12px; font-size: 13px; }
+}
+/* Role colors are also applied in the public resident roster for students. */
+#publicResidentsTableBody tr.resident-role-moop > td { background: rgba(239,48,61,.10); }
+#publicResidentsTableBody tr.resident-role-council > td { background: rgba(239,103,174,.12); }
+#publicResidentsTableBody tr.resident-role-moop > td:first-child { box-shadow: inset 4px 0 #ef303d; }
+#publicResidentsTableBody tr.resident-role-council > td:first-child { box-shadow: inset 4px 0 #ed75b4; }
+#publicResidentsTableBody tr.resident-role-moop .resident-role-fullname,
+#publicResidentsTableBody tr.resident-role-moop .resident-role-label { color: #ff3d4c !important; font-weight: 800; }
+#publicResidentsTableBody tr.resident-role-council .resident-role-fullname,
+#publicResidentsTableBody tr.resident-role-council .resident-role-label { color: #ed75b4 !important; font-weight: 800; }
+
+
+/* Рабочая область жильца: уведомления, бронирование и достижения в одной строке */
+.resident-workspace > .notifications-card,
+.resident-workspace > .tasks-card,
+.resident-workspace > .achievements-launcher-card {
+  grid-row: 1;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.resident-workspace > .achievements-launcher-card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 22px;
+}
+.resident-workspace > .achievements-launcher-card .achievement-launcher-decoration { display: none; }
+.resident-workspace > .admin-tools-launcher-card { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  .resident-workspace { grid-template-columns: minmax(0, 1fr); }
+  .resident-workspace > .notifications-card,
+  .resident-workspace > .tasks-card,
+  .resident-workspace > .achievements-launcher-card { grid-row: auto; }
+}
