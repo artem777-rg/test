@@ -3540,69 +3540,91 @@ if(accountSettingsBtn){
 })();
 
 
-/* Mobile resident panel switcher: three buttons in one compact panel */
+/* Mobile resident panel switcher: three buttons + reliable collapse */
 (function setupResidentMobileNav(){
   const nav = document.getElementById("residentMobileNav");
   const workspace = document.querySelector(".resident-workspace");
   const options = document.getElementById("residentMobileNavOptions");
   if (!nav || !workspace || !options) return;
-  function setView(view) {
+  const collapseBtn = document.getElementById("residentMobileCollapseBtn");
+  const extrasPanel = document.getElementById("residentExtrasPanel");
+  const notifications = workspace.querySelector(".notifications-card");
+  const tasks = workspace.querySelector(".tasks-card");
+  const achievementsLauncher = workspace.querySelector(".achievements-launcher-card");
+  const panels = [notifications, tasks, achievementsLauncher].filter(Boolean);
+
+  function hideAllPanels() {
+    panels.forEach(panel => {
+      panel.classList.add("hidden");
+      panel.style.setProperty("display", "none", "important");
+    });
+    extrasPanel?.classList.add("hidden");
+  }
+  function showView(view) {
     workspace.dataset.mobileView = view;
+    panels.forEach(panel => {
+      panel.classList.remove("hidden");
+      panel.style.removeProperty("display");
+    });
+    if (view === "notifications") {
+      if (tasks) { tasks.classList.add("hidden"); tasks.style.setProperty("display", "none", "important"); }
+      if (achievementsLauncher) { achievementsLauncher.classList.add("hidden"); achievementsLauncher.style.setProperty("display", "none", "important"); }
+      extrasPanel?.classList.add("hidden");
+    } else if (view === "tasks") {
+      if (notifications) { notifications.classList.add("hidden"); notifications.style.setProperty("display", "none", "important"); }
+      if (achievementsLauncher) { achievementsLauncher.classList.add("hidden"); achievementsLauncher.style.setProperty("display", "none", "important"); }
+      extrasPanel?.classList.add("hidden");
+    } else {
+      panels.forEach(panel => { panel.classList.add("hidden"); panel.style.setProperty("display", "none", "important"); });
+      if (currentProfile?.role !== "admin" && extrasPanel) {
+        extrasPanel.classList.remove("hidden");
+        document.getElementById("achievementsTab")?.click();
+      } else if (achievementsLauncher) {
+        achievementsLauncher.classList.remove("hidden");
+        achievementsLauncher.style.removeProperty("display");
+      }
+    }
     nav.querySelectorAll("[data-mobile-view]").forEach(btn => {
       const active = btn.dataset.mobileView === view;
       btn.classList.toggle("active", active);
       btn.setAttribute("aria-pressed", String(active));
     });
-    const extrasPanel = document.getElementById("residentExtrasPanel");
-    if (view === "achievements") {
-      if (currentProfile?.role !== "admin" && extrasPanel) {
-        extrasPanel.classList.remove("hidden");
-        document.getElementById("achievementsTab")?.click();
-        extrasPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      return;
-    }
-    extrasPanel?.classList.add("hidden");
-    const target = view === "tasks" ? workspace.querySelector(".tasks-card") : workspace.querySelector(".notifications-card");
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  const collapseBtn = document.getElementById("residentMobileCollapseBtn");
-  const extrasPanel = document.getElementById("residentExtrasPanel");
   function setCollapsed(collapsed) {
+    const scrollY = window.scrollY;
     workspace.classList.toggle("resident-mobile-panels-collapsed", collapsed);
-    // Hide the actual content panel below the four buttons, not the buttons themselves.
-    const notifications = workspace.querySelector(".notifications-card");
-    const tasks = workspace.querySelector(".tasks-card");
-    const achievementsLauncher = workspace.querySelector(".achievements-launcher-card");
-    [notifications, tasks, achievementsLauncher].forEach(panel => panel?.classList.add("hidden"));
-    extrasPanel?.classList.add("hidden");
-    if (!collapsed) {
-      const view = workspace.dataset.mobileView || "notifications";
-      if (view === "notifications") notifications?.classList.remove("hidden");
-      else if (view === "tasks") tasks?.classList.remove("hidden");
-      else if (view === "achievements") {
-        if (currentProfile?.role !== "admin" && extrasPanel) {
-          extrasPanel.classList.remove("hidden");
-          document.getElementById("achievementsTab")?.click();
-        } else achievementsLauncher?.classList.remove("hidden");
-      }
-    }
+    if (collapsed) hideAllPanels();
+    else showView(workspace.dataset.mobileView || "notifications");
     if (collapseBtn) {
       collapseBtn.textContent = collapsed ? "↕ Развернуть" : "↕ Свернуть";
       collapseBtn.setAttribute("aria-expanded", String(!collapsed));
     }
+    // Collapsing must not trigger scrolling; keep the quick buttons at the same position.
+    requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
   }
-  collapseBtn?.addEventListener("click", () => {
+  collapseBtn?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
     setCollapsed(!workspace.classList.contains("resident-mobile-panels-collapsed"));
   });
   nav.addEventListener("click", event => {
     const button = event.target.closest("[data-mobile-view]");
-    if (button) {
-      setCollapsed(false);
-      setView(button.dataset.mobileView);
-    }
+    if (!button) return;
+    event.preventDefault();
+    setCollapsed(false);
+    showView(button.dataset.mobileView);
+    if (button.dataset.mobileView === "notifications") notifications?.scrollIntoView({behavior:"smooth", block:"start"});
+    else if (button.dataset.mobileView === "tasks") tasks?.scrollIntoView({behavior:"smooth", block:"start"});
+    else if (currentProfile?.role !== "admin") extrasPanel?.scrollIntoView({behavior:"smooth", block:"start"});
   });
   workspace.dataset.mobileView = "notifications";
+  // Telegram tab is the default channel on every load.
+  document.getElementById("telegramNotificationsTab")?.classList.add("active");
+  document.getElementById("telegramNotificationsTab")?.setAttribute("aria-selected", "true");
+  document.getElementById("siteNotificationsTab")?.classList.remove("active");
+  document.getElementById("siteNotificationsTab")?.setAttribute("aria-selected", "false");
+  document.getElementById("telegramNotificationsPane")?.classList.remove("hidden");
+  document.getElementById("siteNotificationsPane")?.classList.add("hidden");
 })();
 
 /* Student achievements / bonuses panel */
