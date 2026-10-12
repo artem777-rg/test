@@ -724,6 +724,8 @@ function renderStudentPersonalStats() {
 
 function updateStudentNavigation() {
     const isStudent = currentProfile?.role !== "admin";
+    const main = document.getElementById("mainContent");
+    main?.classList.toggle("is-admin-dashboard", !isStudent);
     const mobileNav = document.getElementById("residentMobileNav");
     if (mobileNav) mobileNav.classList.toggle("hidden", !isStudent);
     const residentsTab = document.getElementById("residentsTab");
@@ -1124,6 +1126,14 @@ function renderStudents() {
                 ${formatHours(Math.max(stats.debt, 0))}
             </td>
 
+            <td class="resident-actions-cell">
+                ${currentProfile?.role === "admin" && student.id !== currentUser?.id ? `
+                    <button type="button" class="resident-delete-btn" data-delete-student="${escapeHtml(student.id)}" aria-label="Удалить жильца ${escapeHtml(shortName)}" title="Удалить жильца">
+                        <span aria-hidden="true">✕</span> Удалить жильца
+                    </button>
+                ` : ""}
+            </td>
+
         `;
 
 
@@ -1131,6 +1141,63 @@ function renderStudents() {
     }
     if (currentProfile?.role === "admin") renderCouncilAdmin();
 }
+
+
+/* =========================================================
+   ADMIN: DELETE RESIDENT
+========================================================= */
+
+studentsTableBody.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-delete-student]");
+    if (!button) return;
+
+    if (currentProfile?.role !== "admin") {
+        alert("Удалять жильцов может только администратор.");
+        return;
+    }
+
+    const studentId = button.dataset.deleteStudent;
+    const student = students.find(item => String(item.id) === String(studentId));
+    if (!student || studentId === currentUser?.id) return;
+
+    const residentName = student.full_name || student.nickname || "этого жильца";
+    const confirmed = confirm(`Удалить жильца «${residentName}» из списка?\n\nЕсли база данных запрещает удаление или у жильца есть связанные записи, операция не будет выполнена.`);
+    if (!confirmed) return;
+
+    button.disabled = true;
+    button.textContent = "Удаление…";
+
+    try {
+        // Запрашиваем удалённые строки: Supabase может вернуть success без ошибки,
+        // даже если RLS не разрешил удалить ни одной записи.
+        const { data: deletedRows, error } = await supabaseClient
+            .from("students")
+            .delete()
+            .eq("id", studentId)
+            .select("id");
+
+        if (error) throw error;
+        if (!deletedRows || deletedRows.length === 0) {
+            throw new Error("Запись не удалена: Supabase не вернул удалённую строку. Проверьте RLS-политику DELETE для администратора.");
+        }
+
+        students = students.filter(item => String(item.id) !== String(studentId));
+        workHours = workHours.filter(item => String(item.student_id) !== String(studentId));
+        // Сразу перерисовываем таблицу, затем синхронизируем остальные разделы.
+        renderStudents();
+        renderHistory();
+        populateResidentSelects();
+        await Promise.all([renderTopDormitory(), renderAchievements()]);
+        renderStudentPersonalStats();
+        updateStudentNavigation();
+        alert(`Жилец «${residentName}» удалён из списка.`);
+    } catch (error) {
+        console.error("Не удалось удалить жильца:", error);
+        alert(`Не удалось удалить жильца. Проверь права DELETE для администратора в Supabase и связанные ограничения.\n\n${error?.message || "Неизвестная ошибка"}`);
+        button.disabled = false;
+        button.innerHTML = '<span aria-hidden="true">✕</span> Удалить жильца';
+    }
+});
 
 
 /* =========================================================
@@ -2212,6 +2279,14 @@ completeHoursForm.addEventListener(
 );
 
 
+/* Поиск по истории начислений */
+historySearch?.addEventListener("input", () => renderHistory());
+historySearchClear?.addEventListener("click", () => {
+    if (historySearch) historySearch.value = "";
+    renderHistory();
+    historySearch?.focus();
+});
+
 /* =========================================================
    HISTORY
 ========================================================= */
@@ -2220,13 +2295,25 @@ function renderHistory() {
 
     historyTableBody.innerHTML = "";
 
-    const search = "";
+    const search = (historySearch?.value || "").trim().toLocaleLowerCase("ru");
 
     const studentMap = new Map(
         students.map(student => [String(student.id), student])
     );
 
-    const visibleRecords = [...workHours];
+    const visibleRecords = [...workHours].filter(record => {
+        if (!search) return true;
+        const student = studentMap.get(String(record.student_id));
+        const haystack = [
+            student?.full_name,
+            student?.room,
+            record.reason,
+            record.type === "assigned" ? "назначено начислено назначение" : "выполнено закрыто выполнение",
+            String(record.hours ?? ""),
+            formatDate(record.created_at)
+        ].join(" ").toLocaleLowerCase("ru");
+        return haystack.includes(search);
+    });
 
     if (historySearchInfo) {
         historySearchInfo.textContent = search
@@ -3570,6 +3657,8 @@ if(accountSettingsBtn){
       panels.forEach(panel => { panel.classList.add("hidden"); panel.style.setProperty("display", "none", "important"); });
       if (currentProfile?.role !== "admin" && extrasPanel) {
         extrasPanel.classList.remove("hidden");
+        extrasPanel.classList.add("is-centered-modal");
+        document.body.classList.add("resident-extras-modal-open");
         document.getElementById("achievementsTab")?.click();
       } else if (achievementsLauncher) {
         achievementsLauncher.classList.remove("hidden");
@@ -3589,7 +3678,7 @@ if(accountSettingsBtn){
     showView(button.dataset.mobileView);
     if (button.dataset.mobileView === "notifications") notifications?.scrollIntoView({behavior:"smooth", block:"start"});
     else if (button.dataset.mobileView === "tasks") tasks?.scrollIntoView({behavior:"smooth", block:"start"});
-    else if (currentProfile?.role !== "admin") extrasPanel?.scrollIntoView({behavior:"smooth", block:"start"});
+    // Achievements open as a centered modal; do not scroll the page to the inline panel.
   });
   workspace.dataset.mobileView = "notifications";
   // Telegram tab is the default channel on every load.
@@ -3611,8 +3700,77 @@ if(accountSettingsBtn){
   const achievementsPane=document.getElementById("achievementsPane");
   const bonusesPane=document.getElementById("bonusesPane");
   function showPane(which){const ach=which==="achievements"; achievementsPane?.classList.toggle("hidden",!ach); bonusesPane?.classList.toggle("hidden",ach); achievementsTab?.classList.toggle("active",ach); bonusesTab?.classList.toggle("active",!ach); achievementsTab?.setAttribute("aria-selected",String(ach)); bonusesTab?.setAttribute("aria-selected",String(!ach));}
-  openBtn?.addEventListener("click",()=>{ if(currentProfile?.role==="admin") return; panel?.classList.remove("hidden"); showPane("achievements"); panel?.scrollIntoView({behavior:"smooth",block:"start"}); });
-  closeBtn?.addEventListener("click",()=>{panel?.classList.add("hidden"); document.getElementById("residentExtrasLauncher")?.scrollIntoView({behavior:"smooth",block:"center"});});
+  function openPanel(which="achievements") {
+    if (currentProfile?.role === "admin" || !panel) return;
+    panel.classList.remove("hidden");
+    panel.classList.add("is-centered-modal");
+    document.body.classList.add("resident-extras-modal-open");
+    showPane(which);
+  }
+  function closePanel() {
+    panel?.classList.add("hidden");
+    panel?.classList.remove("is-centered-modal");
+    document.body.classList.remove("resident-extras-modal-open");
+  }
+  openBtn?.addEventListener("click",()=>openPanel("achievements"));
+  closeBtn?.addEventListener("click",closePanel);
   achievementsTab?.addEventListener("click",()=>showPane("achievements"));
   bonusesTab?.addEventListener("click",()=>showPane("bonuses"));
+  document.addEventListener("keydown", event => { if (event.key === "Escape" && panel && !panel.classList.contains("hidden")) closePanel(); });
+})();
+
+
+/* Centered, tabbed admin tools modal. Existing form nodes are moved (not cloned),
+   so all existing form handlers and database behavior remain intact. */
+(function setupAdminToolsModal(){
+  const modal = document.getElementById('adminToolsModal');
+  const openBtn = document.getElementById('openAdminTools');
+  const closeBtn = document.getElementById('closeAdminTools');
+  if (!modal || !openBtn) return;
+
+  const cardFor = id => document.getElementById(id)?.closest('.admin-card');
+  const targets = {
+    residents: cardFor('addStudentForm'),
+    assign: cardFor('assignHoursForm'),
+    complete: cardFor('completeHoursForm'),
+    council: cardFor('councilMemberForm'),
+    publish: cardFor('publishTaskForm')
+  };
+  const panes = Object.fromEntries([...modal.querySelectorAll('[data-admin-tool-pane]')].map(el => [el.dataset.adminToolPane, el]));
+  Object.entries(targets).forEach(([key, card]) => {
+    if (card && panes[key]) {
+      panes[key].appendChild(card);
+      card.classList.add('admin-tools-modal-card');
+    }
+  });
+
+  function showTab(key){
+    modal.querySelectorAll('[data-admin-tool-tab]').forEach(btn => {
+      const active = btn.dataset.adminToolTab === key;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+    modal.querySelectorAll('[data-admin-tool-pane]').forEach(pane => pane.classList.toggle('hidden', pane.dataset.adminToolPane !== key));
+  }
+  function open(){
+    if (currentProfile && currentProfile.role !== 'admin') return;
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('admin-tools-modal-open');
+    showTab('residents');
+    closeBtn?.focus({preventScroll:true});
+  }
+  function close(){
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('admin-tools-modal-open');
+    openBtn.focus({preventScroll:true});
+  }
+  openBtn.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  modal.querySelectorAll('[data-close-admin-tools]').forEach(el => el.addEventListener('click', close));
+  modal.querySelectorAll('[data-admin-tool-tab]').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.adminToolTab)));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !modal.classList.contains('hidden')) close();
+  });
 })();
