@@ -2413,3 +2413,13 @@ body.admin-tools-modal-open { overflow: hidden; }
 .moop-intro .council-emblem { background: linear-gradient(135deg, #9f1239, #ef4444); color: #fff; }
 .moop-admin-card { border-color: rgba(255,55,70,.28); }
 .moop-admin-card h2 { color: #ff646e; }
+
+/* Цвета и отображение имён/ников в составах Совета и МООП */
+.council-section .council-member-name,
+.council-section .council-member-nickname { color: #f07dbb !important; }
+.council-section .council-member-nickname { font-weight: 800; }
+.moop-section .moop-member-name,
+.moop-section .moop-member-nickname { color: #ff4b57 !important; }
+.moop-section .moop-member-nickname { font-weight: 800; }
+.moop-section .moop-member-card:before { background: linear-gradient(#ff3b45,#b51224); }
+.moop-section .moop-member-card .council-member-avatar { background: linear-gradient(135deg,#e11d2e,#ff6872); }
