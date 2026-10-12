@@ -3540,26 +3540,18 @@ if(accountSettingsBtn){
 })();
 
 
-/* Mobile resident panel switcher: three buttons + reliable collapse */
+/* Mobile resident panel switcher: three buttons */
 (function setupResidentMobileNav(){
   const nav = document.getElementById("residentMobileNav");
   const workspace = document.querySelector(".resident-workspace");
   const options = document.getElementById("residentMobileNavOptions");
   if (!nav || !workspace || !options) return;
-  const collapseBtn = document.getElementById("residentMobileCollapseBtn");
   const extrasPanel = document.getElementById("residentExtrasPanel");
   const notifications = workspace.querySelector(".notifications-card");
   const tasks = workspace.querySelector(".tasks-card");
   const achievementsLauncher = workspace.querySelector(".achievements-launcher-card");
   const panels = [notifications, tasks, achievementsLauncher].filter(Boolean);
 
-  function hideAllPanels() {
-    panels.forEach(panel => {
-      panel.classList.add("hidden");
-      panel.style.setProperty("display", "none", "important");
-    });
-    extrasPanel?.classList.add("hidden");
-  }
   function showView(view) {
     workspace.dataset.mobileView = view;
     panels.forEach(panel => {
@@ -3590,28 +3582,10 @@ if(accountSettingsBtn){
       btn.setAttribute("aria-pressed", String(active));
     });
   }
-  function setCollapsed(collapsed) {
-    const scrollY = window.scrollY;
-    workspace.classList.toggle("resident-mobile-panels-collapsed", collapsed);
-    if (collapsed) hideAllPanels();
-    else showView(workspace.dataset.mobileView || "notifications");
-    if (collapseBtn) {
-      collapseBtn.textContent = collapsed ? "↕ Развернуть" : "↕ Свернуть";
-      collapseBtn.setAttribute("aria-expanded", String(!collapsed));
-    }
-    // Collapsing must not trigger scrolling; keep the quick buttons at the same position.
-    requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
-  }
-  collapseBtn?.addEventListener("click", event => {
-    event.preventDefault();
-    event.stopPropagation();
-    setCollapsed(!workspace.classList.contains("resident-mobile-panels-collapsed"));
-  });
   nav.addEventListener("click", event => {
     const button = event.target.closest("[data-mobile-view]");
     if (!button) return;
     event.preventDefault();
-    setCollapsed(false);
     showView(button.dataset.mobileView);
     if (button.dataset.mobileView === "notifications") notifications?.scrollIntoView({behavior:"smooth", block:"start"});
     else if (button.dataset.mobileView === "tasks") tasks?.scrollIntoView({behavior:"smooth", block:"start"});
