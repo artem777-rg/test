@@ -1139,7 +1139,7 @@ function renderStudents() {
 
         studentsTableBody.appendChild(row);
     }
-    if (currentProfile?.role === "admin") renderCouncilAdmin();
+    if (currentProfile?.role === "admin") { renderCouncilAdmin(); renderMoopAdmin(); }
 }
 
 
@@ -2509,6 +2509,48 @@ document.getElementById("councilAdminTableBody")?.addEventListener("click", asyn
     await Promise.all([renderCouncilAdmin(), renderCouncilRoster()]);
 });
 
+
+/* Представители МООП */
+async function renderMoopRoster() {
+    const list = document.getElementById("moopRosterList");
+    if (!list) return;
+    const { data, error } = await supabaseClient.rpc("get_public_moop_roster");
+    if (error) { list.innerHTML = '<p class="empty-cell">Не удалось загрузить список. Администратору нужно выполнить файл moop_members.sql в Supabase.</p>'; return; }
+    if (!data?.length) { list.innerHTML = '<div class="council-empty moop-empty"><span>●</span><strong>Представители МООП пока не добавлены</strong><p>Здесь появятся назначенные представители.</p></div>'; return; }
+    list.innerHTML = data.map((m, i) => `<article class="council-member-card moop-member-card"><div class="council-member-avatar">${escapeHtml((m.full_name || "Ж").trim().charAt(0).toUpperCase())}</div><div class="council-member-details"><strong>${escapeHtml(m.full_name || "Без имени")}</strong><span>Комната ${escapeHtml(m.room || "—")}</span></div><span class="council-member-badge moop-member-badge">● ${escapeHtml(m.tag || "МООП")}</span></article>`).join("");
+}
+async function renderMoopAdmin() {
+    if (currentProfile?.role !== "admin") return;
+    const select = document.getElementById("moopStudentSelect"), body = document.getElementById("moopAdminTableBody");
+    if (!select || !body) return;
+    const previous = select.value;
+    select.innerHTML = '<option value="">Выбери пользователя</option>' + students.map(st => `<option value="${escapeHtml(st.id)}">${escapeHtml(st.full_name || st.nickname || "Без имени")} · ${st.role === "admin" ? "администратор" : `комната ${escapeHtml(st.room || "—")}`}</option>`).join("");
+    if (previous) select.value = previous;
+    const { data, error } = await supabaseClient.from("moop_members").select("student_id, tag, created_at").order("created_at", {ascending:true});
+    if (error) { body.innerHTML = '<tr><td colspan="3" class="empty-cell">Выполните moop_members.sql в Supabase.</td></tr>'; return; }
+    if (!data?.length) { body.innerHTML = '<tr><td colspan="3" class="empty-cell">Пока никого не добавили в МООП.</td></tr>'; return; }
+    body.innerHTML = data.map(m => { const st = students.find(x => x.id === m.student_id); return `<tr><td>${escapeHtml(st?.full_name || st?.nickname || "Жилец")}${st?.room ? ` · ${escapeHtml(st.room)}` : ""}</td><td><span class="council-member-badge moop-member-badge">● ${escapeHtml(m.tag || "МООП")}</span></td><td><button type="button" class="btn btn-secondary" data-moop-remove="${escapeHtml(m.student_id)}">Убрать</button></td></tr>`; }).join("");
+}
+const moopMemberForm = document.getElementById("moopMemberForm");
+moopMemberForm?.addEventListener("submit", async event => {
+    event.preventDefault(); if (currentProfile?.role !== "admin") return;
+    const studentId = document.getElementById("moopStudentSelect")?.value, tag = document.getElementById("moopMemberTag")?.value.trim(), message = document.getElementById("moopAdminMessage");
+    if (!studentId || !tag) return;
+    const { error } = await supabaseClient.from("moop_members").upsert({student_id:studentId, tag}, {onConflict:"student_id"});
+    if (error) { if (message) message.textContent = "Не удалось сохранить. Проверьте, что выполнен moop_members.sql."; console.error(error); return; }
+    if (message) message.textContent = "Представитель МООП добавлен.";
+    document.getElementById("moopMemberTag").value = "";
+    await Promise.all([renderMoopAdmin(), renderMoopRoster()]);
+});
+document.getElementById("moopAdminTableBody")?.addEventListener("click", async event => {
+    const button = event.target.closest("[data-moop-remove]"); if (!button || currentProfile?.role !== "admin") return;
+    const { error } = await supabaseClient.from("moop_members").delete().eq("student_id", button.dataset.moopRemove);
+    const message = document.getElementById("moopAdminMessage"); if (error) { if (message) message.textContent = "Не удалось убрать представителя МООП."; return; }
+    if (message) message.textContent = "Представитель удалён из МООП.";
+    await Promise.all([renderMoopAdmin(), renderMoopRoster()]);
+});
+
+
 const rosterAllTab = document.getElementById("rosterAllTab");
 const rosterCouncilTab = document.getElementById("rosterCouncilTab");
 function activateRosterSubtab(tab) {
@@ -2554,6 +2596,8 @@ activateNotificationChannel("telegram");
 const historyTab = document.getElementById("historyTab");
 const publicResidentsTab = document.getElementById("publicResidentsTab");
 const councilTab = document.getElementById("councilTab");
+const moopTab = document.getElementById("moopTab");
+const moopSection = document.getElementById("moopSection");
 const historySection = document.getElementById("historySection");
 const publicResidentsSection = document.getElementById("publicResidentsSection");
 const councilSection = document.getElementById("councilSection");
@@ -2563,8 +2607,10 @@ function syncDataTabsForRole() {
     const isAdmin = currentProfile?.role === "admin";
     publicResidentsTab?.classList.toggle("hidden", isAdmin);
     councilTab?.classList.toggle("hidden", isAdmin);
+    moopTab?.classList.toggle("hidden", isAdmin);
     publicResidentsSection?.classList.toggle("hidden", isAdmin || !publicResidentsTab?.classList.contains("active"));
     councilSection?.classList.toggle("hidden", isAdmin || !councilTab?.classList.contains("active"));
+    moopSection?.classList.toggle("hidden", isAdmin || !moopTab?.classList.contains("active"));
     const tabs = document.querySelector(".data-tabs");
     tabs?.classList.toggle("admin-data-tabs", isAdmin);
 }
@@ -2574,17 +2620,20 @@ function activateDataTab(tab) {
     const showHistory = tab === "history";
     const showPublicResidents = tab === "publicResidents" && currentProfile?.role !== "admin";
     const showCouncil = tab === "council" && currentProfile?.role !== "admin";
+    const showMoop = tab === "moop" && currentProfile?.role !== "admin";
     if (studentsSection) studentsSection.classList.toggle("hidden", !showResidents);
     if (historySection) historySection.classList.toggle("hidden", !showHistory);
     if (publicResidentsSection) publicResidentsSection.classList.toggle("hidden", !showPublicResidents);
     if (councilSection) councilSection.classList.toggle("hidden", !showCouncil);
-    for (const [button, active] of [[residentsTab, showResidents], [historyTab, showHistory], [publicResidentsTab, showPublicResidents], [councilTab, showCouncil]]) {
+    if (moopSection) moopSection.classList.toggle("hidden", !showMoop);
+    for (const [button, active] of [[residentsTab, showResidents], [historyTab, showHistory], [publicResidentsTab, showPublicResidents], [councilTab, showCouncil], [moopTab, showMoop]]) {
         button?.classList.toggle("active", active);
         button?.setAttribute("aria-selected", String(active));
     }
     if (showHistory) renderHistory();
     if (showPublicResidents) renderPublicResidents();
     if (showCouncil) renderCouncilRoster();
+    if (showMoop) renderMoopRoster();
     syncDataTabsForRole();
 }
 
@@ -2592,6 +2641,7 @@ residentsTab?.addEventListener("click", () => activateDataTab("residents"));
 historyTab?.addEventListener("click", () => activateDataTab("history"));
 publicResidentsTab?.addEventListener("click", () => activateDataTab("publicResidents"));
 councilTab?.addEventListener("click", () => activateDataTab("council"));
+moopTab?.addEventListener("click", () => activateDataTab("moop"));
 syncDataTabsForRole();
 
 const publicResidentsCollapseToggle = document.getElementById("publicResidentsCollapseToggle");
@@ -3039,6 +3089,60 @@ function renderPublicTasks() {
         const statusText = isFull ? "Набор закрыт" : `Свободно мест: ${Math.max(0, capacity - bookedCount)}`;
         return `<article class="resident-task-item"><div class="resident-task-info"><div class="resident-task-title">${escapeHtml(task.title)}</div><div>${escapeHtml(task.details || "")}</div><div class="resident-task-meta"><span>⏱ ${escapeHtml(formatHours(task.hours))} ч. каждому</span><span>📅 ${escapeHtml(dueText)}</span><span>👥 ${bookedCount}/${capacity}</span><span class="task-status ${isFull ? 'booked' : ''}">${statusText}</span></div></div><div class="task-actions">${action}</div></article>`;
     }).join("");
+}
+
+// Публикация события: серверная RPC проверяет роль администратора,
+// создаёт уведомления на сайте и ставит Telegram-сообщения в очередь.
+const publishEventForm = document.getElementById("publishEventForm");
+const publishEventMessage = document.getElementById("publishEventMessage");
+if (publishEventForm) {
+    publishEventForm.addEventListener("submit", async event => {
+        event.preventDefault();
+        clearMessage(publishEventMessage);
+        if (currentProfile?.role !== "admin") {
+            showMessage(publishEventMessage, "Публиковать события может только администратор.", "error");
+            return;
+        }
+        const title = document.getElementById("eventTitle").value.trim();
+        const date = document.getElementById("eventDate").value;
+        const time = document.getElementById("eventTime").value;
+        const details = document.getElementById("eventDetails").value.trim();
+        if (!title || !date || !time) {
+            showMessage(publishEventMessage, "Укажи название, дату и время события.", "error");
+            return;
+        }
+        const startsAt = new Date(`${date}T${time}:00`).toISOString();
+        const button = publishEventForm.querySelector("button[type='submit']");
+        const originalLabel = button.textContent;
+        button.disabled = true;
+        button.textContent = "Публикуем…";
+        try {
+            const { data, error } = await supabaseClient.rpc("publish_dorm_event", {
+                p_title: title,
+                p_details: details,
+                p_event_at: startsAt
+            });
+            if (error) throw error;
+            const result = Array.isArray(data) ? data[0] : data;
+            const siteCount = Number(result?.site_notifications ?? result?.site_count ?? 0);
+            const telegramCount = Number(result?.telegram_notifications ?? result?.telegram_count ?? 0);
+            showMessage(publishEventMessage,
+                `Событие опубликовано. Уведомления на сайте: ${siteCount}. Сообщения поставлены в очередь Telegram: ${telegramCount}.`,
+                "success");
+            publishEventForm.reset();
+            document.getElementById("eventTime").value = "19:00";
+            await loadNotifications();
+            renderNotifications();
+        } catch (error) {
+            console.error("Не удалось опубликовать событие:", error);
+            showMessage(publishEventMessage,
+                error.message || "Не удалось опубликовать событие. Проверь, что выполнен SQL-файл event_announcements.sql.",
+                "error");
+        } finally {
+            button.disabled = false;
+            button.textContent = originalLabel;
+        }
+    });
 }
 
 if (publishTaskForm) {
@@ -3734,6 +3838,7 @@ if(accountSettingsBtn){
     assign: cardFor('assignHoursForm'),
     complete: cardFor('completeHoursForm'),
     council: cardFor('councilMemberForm'),
+    moop: cardFor('moopMemberForm'),
     publish: cardFor('publishTaskForm')
   };
   const panes = Object.fromEntries([...modal.querySelectorAll('[data-admin-tool-pane]')].map(el => [el.dataset.adminToolPane, el]));
