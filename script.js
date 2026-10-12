@@ -3567,16 +3567,38 @@ if(accountSettingsBtn){
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   const collapseBtn = document.getElementById("residentMobileCollapseBtn");
+  const extrasPanel = document.getElementById("residentExtrasPanel");
+  function setCollapsed(collapsed) {
+    workspace.classList.toggle("resident-mobile-panels-collapsed", collapsed);
+    // Hide the actual content panel below the four buttons, not the buttons themselves.
+    const notifications = workspace.querySelector(".notifications-card");
+    const tasks = workspace.querySelector(".tasks-card");
+    const achievementsLauncher = workspace.querySelector(".achievements-launcher-card");
+    [notifications, tasks, achievementsLauncher].forEach(panel => panel?.classList.add("hidden"));
+    extrasPanel?.classList.add("hidden");
+    if (!collapsed) {
+      const view = workspace.dataset.mobileView || "notifications";
+      if (view === "notifications") notifications?.classList.remove("hidden");
+      else if (view === "tasks") tasks?.classList.remove("hidden");
+      else if (view === "achievements") {
+        if (currentProfile?.role !== "admin" && extrasPanel) {
+          extrasPanel.classList.remove("hidden");
+          document.getElementById("achievementsTab")?.click();
+        } else achievementsLauncher?.classList.remove("hidden");
+      }
+    }
+    if (collapseBtn) {
+      collapseBtn.textContent = collapsed ? "↕ Развернуть" : "↕ Свернуть";
+      collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+    }
+  }
   collapseBtn?.addEventListener("click", () => {
-    const collapsed = workspace.classList.toggle("resident-mobile-panels-collapsed");
-    collapseBtn.textContent = collapsed ? "↕ Развернуть" : "↕ Свернуть";
-    collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+    setCollapsed(!workspace.classList.contains("resident-mobile-panels-collapsed"));
   });
   nav.addEventListener("click", event => {
     const button = event.target.closest("[data-mobile-view]");
     if (button) {
-      workspace.classList.remove("resident-mobile-panels-collapsed");
-      if (collapseBtn) { collapseBtn.textContent = "↕ Свернуть"; collapseBtn.setAttribute("aria-expanded", "true"); }
+      setCollapsed(false);
       setView(button.dataset.mobileView);
     }
   });
