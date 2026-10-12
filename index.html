@@ -216,14 +216,14 @@
                             <div><h2>🔔 Уведомления</h2><p>Уведомления сайта и подключение Telegram</p></div>
                         </div>
                         <div class="notification-channel-tabs" role="tablist" aria-label="Каналы уведомлений">
-                            <button type="button" class="notification-channel-tab" id="telegramNotificationsTab" role="tab" aria-selected="false">✈️ Telegram</button>
-                            <button type="button" class="notification-channel-tab active" id="siteNotificationsTab" role="tab" aria-selected="true">🔔 На сайте</button>
+                            <button type="button" class="notification-channel-tab active" id="telegramNotificationsTab" role="tab" aria-selected="true">✈️ Telegram</button>
+                            <button type="button" class="notification-channel-tab" id="siteNotificationsTab" role="tab" aria-selected="false">🔔 На сайте</button>
                         </div>
-                        <div id="siteNotificationsPane" class="notification-channel-pane">
+                        <div id="siteNotificationsPane" class="notification-channel-pane hidden">
                             <div class="notification-pane-actions"><span class="muted">Назначения, списания часов и новости о заданиях</span><button id="markNotificationsRead" class="btn btn-secondary" type="button">Прочитать все</button></div>
                             <div id="notificationsList" class="notifications-list"><p class="muted">Загрузка уведомлений…</p></div>
                         </div>
-                        <div id="telegramNotificationsPane" class="notification-channel-pane hidden" role="tabpanel" aria-labelledby="telegramNotificationsTab">
+                        <div id="telegramNotificationsPane" class="notification-channel-pane" role="tabpanel" aria-labelledby="telegramNotificationsTab">
                             <section class="telegram-connect-card" id="telegramConnectCard" aria-live="polite">
                                 <p class="muted">Проверяем подключение…</p>
                                 <p id="telegramConnectStatus" class="muted">Проверяем подключение…</p>
