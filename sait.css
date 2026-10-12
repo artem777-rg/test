@@ -2351,3 +2351,65 @@ body.admin-tools-modal-open { overflow: hidden; }
 .resident-delete-btn:disabled { opacity: .65; cursor: wait; }
 #studentsTableBody tr:hover .resident-delete-btn, #studentsTableBody tr:focus-within .resident-delete-btn { opacity: 1; visibility: visible; transform: translateX(0); }
 @media (hover: none), (max-width: 700px) { .resident-delete-btn { opacity: 1; visibility: visible; transform: none; padding: 8px; } .resident-delete-btn span { display: none; } .resident-actions-cell { padding-left: 2px; padding-right: 6px; } }
+
+
+/* Поле дополнительной информации в форме публикации мероприятий */
+.publish-event-card .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+.publish-event-card .form-group { margin: 0; min-width: 0; }
+.publish-event-card .form-group input,
+.publish-event-card .form-group textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--border-color, rgba(130, 148, 255, .32));
+    border-radius: 12px;
+    background: rgba(8, 13, 34, .72);
+    color: var(--text-color, #f4f6ff);
+    font: inherit;
+    padding: 12px 14px;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.publish-event-card .form-group textarea {
+    min-height: 112px;
+    resize: vertical;
+    line-height: 1.55;
+}
+.publish-event-card .form-group input::placeholder,
+.publish-event-card .form-group textarea::placeholder {
+    color: rgba(218, 224, 255, .58);
+    opacity: 1;
+}
+.publish-event-card .form-group input:focus,
+.publish-event-card .form-group textarea:focus {
+    outline: none;
+    border-color: #8995ff;
+    background: rgba(11, 17, 43, .94);
+    box-shadow: 0 0 0 3px rgba(104, 120, 255, .18);
+}
+.publish-event-card .form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text-color, #f4f6ff);
+    font-weight: 600;
+}
+@media (max-width: 600px) {
+    .publish-event-card .form-grid { grid-template-columns: minmax(0, 1fr); }
+    .publish-event-card .form-group input,
+    .publish-event-card .form-group textarea { font-size: 16px; }
+}
+
+/* Совет общежития — розовый акцент; представители МООП — красный */
+.council-section .council-member-badge,
+.roster-inline-council-tag { color: #ff8fc8; border-color: rgba(255,105,180,.45); background: rgba(255,105,180,.12); }
+.council-section .council-member-avatar { background: linear-gradient(135deg, #a83b78, #ef78b7); }
+.moop-section .council-member-badge,
+.moop-member-badge { color: #ff646e; border-color: rgba(255,55,70,.5); background: rgba(255,45,60,.14); }
+.moop-member-card { border-color: rgba(255,55,70,.24); }
+.moop-member-card .council-member-avatar,
+.moop-intro .council-emblem { background: linear-gradient(135deg, #9f1239, #ef4444); color: #fff; }
+.moop-admin-card { border-color: rgba(255,55,70,.28); }
+.moop-admin-card h2 { color: #ff646e; }
