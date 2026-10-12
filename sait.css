@@ -2611,3 +2611,232 @@ body.admin-tools-modal-open { overflow: hidden; }
     height: auto !important;
     min-height: 230px !important;
 }
+
+/* Список жильцов, забронировавших задание (виден администратору) */
+.task-booked-residents {
+    margin-top: 12px;
+    padding: 10px 13px;
+    border: 1px solid rgba(124, 92, 255, 0.28);
+    border-radius: 10px;
+    background: rgba(124, 92, 255, 0.08);
+    color: var(--text-color, inherit);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+.task-booked-residents strong { display: block; margin-bottom: 5px; }
+.task-booked-residents ul { margin: 0; padding-left: 19px; }
+.task-booked-residents li + li { margin-top: 3px; }
+.task-booked-residents-empty { color: #929bb8; border-style: dashed; background: transparent; }
+
+/* =========================================================
+   FINAL THEME FIX: ВСЕ ПАНЕЛИ СТУДЕНЧЕСКОЙ СТРАНИЦЫ
+   Единый выбор цвета применяется также к рейтингу, контактному блоку,
+   уведомлениям, бронированию, статистике и вложенным карточкам.
+========================================================= */
+:root {
+  --theme-surface-light: #ffffff;
+  --theme-surface-light-inner: #f3f6ff;
+  --theme-surface-border-light: #d7def3;
+}
+
+/* Светлая тема: никакие новые панели не должны оставаться синими */
+body.light-theme .top-dormitory-card,
+body.light-theme .global-ranking-card,
+body.light-theme .leaderboard-owner,
+body.light-theme .workspace-card,
+body.light-theme .notifications-card,
+body.light-theme .tasks-card,
+body.light-theme .telegram-connect-card,
+body.light-theme .student-stats-card,
+body.light-theme .achievements-card,
+body.light-theme .resident-extras-panel,
+body.light-theme .resident-extras-launcher,
+body.light-theme .work-history-card,
+body.light-theme .admin-card,
+body.light-theme .welcome-card,
+body.light-theme .students-section {
+  background: var(--theme-surface-light) !important;
+  color: #17203b !important;
+  border-color: var(--theme-surface-border-light) !important;
+}
+body.light-theme .leaderboard-owner,
+body.light-theme .leaderboard-owner-label,
+body.light-theme .leaderboard-contact-note,
+body.light-theme .top-dormitory-card p,
+body.light-theme .top-dormitory-card small,
+body.light-theme .workspace-card p,
+body.light-theme .workspace-card span,
+body.light-theme .student-stats-card p,
+body.light-theme .student-stats-card span,
+body.light-theme .achievements-card p {
+  color: #56617f;
+}
+body.light-theme .leaderboard-contact-footer,
+body.light-theme .leaderboard-owner-icon,
+body.light-theme .student-stat-tile,
+body.light-theme .achievement-item,
+body.light-theme .top-resident-item,
+body.light-theme .notification-item,
+body.light-theme .resident-task-card {
+  background: var(--theme-surface-light-inner) !important;
+  color: #17203b !important;
+  border-color: #dce2f1 !important;
+}
+
+/* Пользовательский цвет панелей имеет приоритет над любыми темами */
+body.custom-panels-active .welcome-card,
+body.custom-panels-active .admin-card,
+body.custom-panels-active .students-section,
+body.custom-panels-active .modal-card,
+body.custom-panels-active .workspace-card,
+body.custom-panels-active .notifications-card,
+body.custom-panels-active .tasks-card,
+body.custom-panels-active .telegram-connect-card,
+body.custom-panels-active .student-stats-card,
+body.custom-panels-active .top-dormitory-card,
+body.custom-panels-active .global-ranking-card,
+body.custom-panels-active .leaderboard-owner,
+body.custom-panels-active .achievements-card,
+body.custom-panels-active .resident-extras-panel,
+body.custom-panels-active .resident-extras-launcher,
+body.custom-panels-active .work-history-card {
+  background: var(--custom-panel-color) !important;
+  border-color: color-mix(in srgb, var(--custom-panel-color) 72%, white) !important;
+}
+body.custom-panels-active .student-stat-tile,
+body.custom-panels-active .achievement-item,
+body.custom-panels-active .top-resident-item,
+body.custom-panels-active .notification-item,
+body.custom-panels-active .resident-task-card,
+body.custom-panels-active .leaderboard-contact-footer,
+body.custom-panels-active .leaderboard-owner-icon {
+  background: color-mix(in srgb, var(--custom-panel-color) 84%, var(--custom-accent) 16%) !important;
+  border-color: color-mix(in srgb, var(--custom-panel-color) 70%, white) !important;
+}
+body.custom-panels-active .top-dormitory-card,
+body.custom-panels-active .student-stats-card,
+body.custom-panels-active .leaderboard-owner,
+body.custom-panels-active .workspace-card,
+body.custom-panels-active .notifications-card,
+body.custom-panels-active .tasks-card,
+body.custom-panels-active .achievements-card,
+body.custom-panels-active .telegram-connect-card {
+  background-image: none !important;
+}
+
+/* THEME CONSISTENCY FIX: панели студентов во всех темах */
+body.theme-forest .top-dormitory-card,
+body.theme-forest .global-ranking-card,
+body.theme-forest .leaderboard-owner,
+body.theme-forest .workspace-card,
+body.theme-forest .notifications-card,
+body.theme-forest .tasks-card,
+body.theme-forest .telegram-connect-card,
+body.theme-forest .student-stats-card,
+body.theme-forest .achievements-card,
+body.theme-forest .resident-extras-panel,
+body.theme-forest .resident-extras-launcher,
+body.theme-forest .work-history-card,
+body.theme-forest .admin-card,
+body.theme-forest .welcome-card,
+body.theme-forest .students-section {
+  background: linear-gradient(145deg, rgba(24,65,54,.97), rgba(8,27,23,.97)) !important;
+  color: #effff8 !important; border-color: #326a58 !important;
+}
+body.theme-sunset .top-dormitory-card,
+body.theme-sunset .global-ranking-card,
+body.theme-sunset .leaderboard-owner,
+body.theme-sunset .workspace-card,
+body.theme-sunset .notifications-card,
+body.theme-sunset .tasks-card,
+body.theme-sunset .telegram-connect-card,
+body.theme-sunset .student-stats-card,
+body.theme-sunset .achievements-card,
+body.theme-sunset .resident-extras-panel,
+body.theme-sunset .resident-extras-launcher,
+body.theme-sunset .work-history-card,
+body.theme-sunset .admin-card,
+body.theme-sunset .welcome-card,
+body.theme-sunset .students-section {
+  background: linear-gradient(145deg, rgba(76,42,65,.97), rgba(35,27,49,.97)) !important;
+  color: #fff6f5 !important; border-color: #75465f !important;
+}
+body.theme-rose .top-dormitory-card,
+body.theme-rose .global-ranking-card,
+body.theme-rose .leaderboard-owner,
+body.theme-rose .workspace-card,
+body.theme-rose .notifications-card,
+body.theme-rose .tasks-card,
+body.theme-rose .telegram-connect-card,
+body.theme-rose .student-stats-card,
+body.theme-rose .achievements-card,
+body.theme-rose .resident-extras-panel,
+body.theme-rose .resident-extras-launcher,
+body.theme-rose .work-history-card,
+body.theme-rose .admin-card,
+body.theme-rose .welcome-card,
+body.theme-rose .students-section {
+  background: linear-gradient(145deg, rgba(73,37,70,.97), rgba(34,22,43,.97)) !important;
+  color: #fff4fb !important; border-color: #77466f !important;
+}
+body.theme-forest .leaderboard-contact-footer, body.theme-forest .leaderboard-owner-icon,
+body.theme-forest .student-stat-tile, body.theme-forest .achievement-item,
+body.theme-forest .top-resident-item, body.theme-forest .notification-item,
+body.theme-forest .resident-task-card { background: rgba(10,35,29,.88) !important; color:#effff8 !important; border-color:#326a58 !important; }
+body.theme-sunset .leaderboard-contact-footer, body.theme-sunset .leaderboard-owner-icon,
+body.theme-sunset .student-stat-tile, body.theme-sunset .achievement-item,
+body.theme-sunset .top-resident-item, body.theme-sunset .notification-item,
+body.theme-sunset .resident-task-card { background: rgba(35,26,45,.9) !important; color:#fff6f5 !important; border-color:#75465f !important; }
+body.theme-rose .leaderboard-contact-footer, body.theme-rose .leaderboard-owner-icon,
+body.theme-rose .student-stat-tile, body.theme-rose .achievement-item,
+body.theme-rose .top-resident-item, body.theme-rose .notification-item,
+body.theme-rose .resident-task-card { background: rgba(34,24,42,.9) !important; color:#fff4fb !important; border-color:#77466f !important; }
+/* Выбранный пользователем цвет панелей действует поверх любой темы */
+body.custom-panels-active .top-resident-item,
+body.custom-panels-active .leaderboard-contact-block,
+body.custom-panels-active .leaderboard-contact-footer,
+body.custom-panels-active .student-stat-tile,
+body.custom-panels-active .achievement-item,
+body.custom-panels-active .notification-item,
+body.custom-panels-active .resident-task-card,
+body.custom-panels-active .leaderboard-owner-icon {
+  background: color-mix(in srgb, var(--custom-panel-color) 84%, var(--custom-accent, #7c6cff) 16%) !important;
+  border-color: color-mix(in srgb, var(--custom-panel-color) 70%, white) !important;
+}
+
+/* MOBILE FIX: prevent the left leaderboard/contact panel from becoming a full-height overlay */
+@media (max-width: 680px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+  #mainContent, #mainContent.is-admin-dashboard,
+  .global-ranking-card, .top-leaderboard-layout,
+  .top-leaderboard-layout > *, .resident-workspace,
+  .resident-workspace > *, .workspace-card,
+  .notifications-card, .tasks-card,
+  .achievements-launcher-card { min-width: 0 !important; max-width: 100%; box-sizing: border-box; }
+  .top-leaderboard-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+  .top-leaderboard-layout .leaderboard-owner {
+    position: relative !important;
+    inset: auto !important;
+    float: none !important;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+    z-index: auto !important;
+    padding: 12px !important;
+  }
+  .top-leaderboard-layout .top-dormitory-list { width: 100% !important; min-width: 0 !important; }
+  .top-leaderboard-layout .leaderboard-contact-footer { margin-top: 8px !important; }
+  #mainContent.is-admin-dashboard > .global-ranking-card,
+  #mainContent.is-admin-dashboard > .resident-workspace { grid-column: 1 !important; grid-row: auto !important; width: 100% !important; }
+  .resident-workspace { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; }
+}
