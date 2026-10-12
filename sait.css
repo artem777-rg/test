@@ -998,7 +998,6 @@ tbody tr:hover {
     margin: 0 0 10px;
 
     color: #ff6f89;
-
     font-size: 14px;
 }
 
@@ -2502,4 +2501,113 @@ body.admin-tools-modal-open { overflow: hidden; }
   .resident-workspace > .notifications-card,
   .resident-workspace > .tasks-card,
   .resident-workspace > .achievements-launcher-card { grid-row: auto; }
+}
+
+
+/* =========================================================
+   FINAL FIX - DESKTOP OVERFLOW / RESIDENT WORKSPACE
+========================================================= */
+
+.resident-workspace {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+    gap: 18px;
+    width: 100%;
+    align-items: start;
+}
+
+.workspace-card,
+.notifications-card,
+.tasks-card {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.workspace-heading,
+.workspace-heading h2,
+.workspace-heading p {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.resident-tasks-list,
+.resident-task-item {
+    width: 100%;
+    min-width: 0;
+}
+
+.resident-task-item * {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.resident-task-item button {
+    white-space: normal;
+}
+
+@media (max-width: 1200px) {
+    .resident-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   ADMIN DASHBOARD LAYOUT FIX
+========================================================= */
+
+.is-admin-dashboard .resident-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+}
+
+.is-admin-dashboard .workspace-card {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.is-admin-dashboard #notificationsSection,
+.is-admin-dashboard #tasksSection,
+.is-admin-dashboard #adminPanel {
+    width: 100%;
+    max-width: 100%;
+}
+
+.is-admin-dashboard .workspace-card * {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+#adminPanel,
+#adminPanel .admin-card,
+#adminPanel .admin-section {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+#adminPanel table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* FIX: admin right panels in vertical column */
+#mainContent.is-admin-dashboard > .resident-workspace {
+    grid-column: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    height: auto !important;
+    align-self: start !important;
+}
+
+#mainContent.is-admin-dashboard > .resident-workspace > .workspace-card,
+#mainContent.is-admin-dashboard > .resident-workspace > .admin-tools-launcher-card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 230px !important;
 }
