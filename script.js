@@ -724,6 +724,8 @@ function renderStudentPersonalStats() {
 
 function updateStudentNavigation() {
     const isStudent = currentProfile?.role !== "admin";
+    const mobileNav = document.getElementById("residentMobileNav");
+    if (mobileNav) mobileNav.classList.toggle("hidden", !isStudent);
     const residentsTab = document.getElementById("residentsTab");
     const studentsSection = document.querySelector(".students-section:not(.history-section):not(.public-residents-section)");
     const tabs = document.querySelector(".data-tabs");
@@ -3535,6 +3537,49 @@ if(accountSettingsBtn){
     document.addEventListener("keydown", event => { if (event.key === "Escape" && !modal.classList.contains("hidden")) closeGame(); });
 })();
 
+
+/* Mobile quick navigation: one button opens a menu of resident panels */
+(function setupResidentMobileNav(){
+  const nav = document.getElementById("residentMobileNav");
+  const workspace = document.querySelector(".resident-workspace");
+  const trigger = document.getElementById("residentMobileNavTrigger");
+  const options = document.getElementById("residentMobileNavOptions");
+  if (!nav || !workspace || !trigger || !options) return;
+  function closeMenu(){ options.classList.add("hidden"); trigger.setAttribute("aria-expanded","false"); }
+  function setView(view) {
+    workspace.dataset.mobileView = view;
+    nav.querySelectorAll("[data-mobile-view]").forEach(btn => {
+      const active = btn.dataset.mobileView === view;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
+    closeMenu();
+    if (view === "achievements") {
+      const panel = document.getElementById("residentExtrasPanel");
+      if (currentProfile?.role !== "admin" && panel) {
+        panel.classList.remove("hidden");
+        document.getElementById("achievementsTab")?.click();
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
+    document.getElementById("residentExtrasPanel")?.classList.add("hidden");
+    const target = view === "tasks" ? workspace.querySelector(".tasks-card") : workspace.querySelector(".notifications-card");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  trigger.addEventListener("click", () => {
+    const opening = options.classList.contains("hidden");
+    options.classList.toggle("hidden", !opening);
+    trigger.setAttribute("aria-expanded", String(opening));
+  });
+  nav.addEventListener("click", event => {
+    const button = event.target.closest("[data-mobile-view]");
+    if (button) setView(button.dataset.mobileView);
+  });
+  document.addEventListener("click", event => { if (!nav.contains(event.target)) closeMenu(); });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+  workspace.dataset.mobileView = "notifications";
+})();
 
 /* Student achievements / bonuses panel */
 (function setupResidentExtrasPanel(){
