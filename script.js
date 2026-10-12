@@ -901,7 +901,7 @@ async function loadStudents() {
 async function loadResidentRoleMemberships() {
     councilResidentIds = new Set();
     moopResidentIds = new Set();
-    if (currentProfile?.role !== "admin") return;
+    // Membership is readable by every authenticated resident; use it for student-facing highlighting too.
     const [councilResult, moopResult] = await Promise.all([
         supabaseClient.from("council_members").select("student_id"),
         supabaseClient.from("moop_members").select("student_id")
@@ -1120,6 +1120,8 @@ function renderStudents() {
             document.createElement("tr");
         const isMoop = moopResidentIds.has(String(student.id));
         const isCouncil = councilResidentIds.has(String(student.id));
+        const moopTag = moopMemberTags?.get(String(student.id)) || "МООП";
+        const councilTag = councilMemberTags?.get(String(student.id)) || "Совет";
         row.classList.add("resident-role-row");
         if (isMoop) row.classList.add("resident-role-moop");
         else if (isCouncil) row.classList.add("resident-role-council");
@@ -1133,7 +1135,7 @@ function renderStudents() {
             <td class="name-cell">
                 <span class="resident-role-fullname">${escapeHtml(shortName)}</span>
                 ${student.nickname ? `<span class="resident-role-nickname">@${escapeHtml(student.nickname)}</span>` : ""}
-                ${isMoop ? '<span class="resident-role-label">● МООП</span>' : isCouncil ? '<span class="resident-role-label">✦ Совет</span>' : ""}
+                ${isMoop ? `<span class="resident-role-label">● ${escapeHtml(moopTag)}</span>` : isCouncil ? `<span class="resident-role-label">✦ ${escapeHtml(councilTag)}</span>` : ""}
             </td>
 
             <td class="hours-cell">
@@ -2391,6 +2393,9 @@ function renderHistory() {
 /* =========================================================
    PUBLIC RESIDENT ROSTER (names + room only)
 ========================================================= */
+let moopMemberTags = new Map();
+let councilMemberTags = new Map();
+
 async function renderPublicResidents() {
     const body = document.getElementById("publicResidentsTableBody");
     if (!body) return;
@@ -2410,9 +2415,22 @@ async function renderPublicResidents() {
     // В публичном списке не показываем комнату 000 (воспитатель).
     data = (data || []).filter(person => String(person.room || "").trim() !== "000");
     // Подтягиваем публичные теги Совета, чтобы отметить участников и в общем списке.
-    const { data: councilMembers, error: councilError } = await supabaseClient.rpc("get_public_council_roster");
+    const [councilRosterResult, moopRosterResult] = await Promise.all([
+        supabaseClient.rpc("get_public_council_roster"),
+        supabaseClient.rpc("get_public_moop_roster")
+    ]);
+    const councilMembers = councilRosterResult.data;
+    const councilError = councilRosterResult.error;
     const councilByPerson = new Map();
+    const moopByPerson = new Map();
+    moopMemberTags = new Map();
+    councilMemberTags = new Map();
+    if (!moopRosterResult.error) (moopRosterResult.data || []).forEach(member => {
+        if (member.student_id) moopMemberTags.set(String(member.student_id), member.tag || "МООП");
+        moopByPerson.set(`${String(member.room || "").trim()}|${String(member.full_name || "").trim().toLocaleLowerCase("ru")}`, member);
+    });
     if (!councilError) (councilMembers || []).forEach(member => {
+        if (member.student_id) councilMemberTags.set(String(member.student_id), member.tag || "Совет");
         councilByPerson.set(`${String(member.room || "").trim()}|${String(member.full_name || "").trim().toLocaleLowerCase("ru")}`, member.tag || "Совет общежития");
     });
     data.sort((a, b) => String(a.room || "").localeCompare(String(b.room || ""), "ru", {numeric:true}));
@@ -2423,7 +2441,15 @@ async function renderPublicResidents() {
     body.innerHTML = data.map(person => {
         const key = `${String(person.room || "").trim()}|${String(person.full_name || "").trim().toLocaleLowerCase("ru")}`;
         const tag = councilByPerson.get(key);
-        return `<tr class="${tag ? "roster-council-row" : ""}"><td class="room-cell">${escapeHtml(person.room || "—")}</td><td class="name-cell">${tag ? `<span class="roster-council-name">${escapeHtml(person.full_name || "Без имени")}</span>` : escapeHtml(person.full_name || "Без имени")}${tag ? ` <span class="council-member-badge roster-inline-council-tag">✦ ${escapeHtml(tag)}</span>` : ""}</td></tr>`;
+        const moopMember = moopByPerson.get(key);
+        const isMoop = Boolean(moopMember);
+        const isCouncil = Boolean(tag) && !isMoop;
+        const personName = escapeHtml(person.full_name || "Без имени");
+        const roleClass = isMoop ? "resident-role-moop" : isCouncil ? "resident-role-council" : "";
+        const roleTag = isMoop
+            ? ` <span class="resident-role-label">● ${escapeHtml(moopMember.tag || "МООП")}</span>`
+            : isCouncil ? ` <span class="resident-role-label">✦ ${escapeHtml(tag || "Совет")}</span>` : "";
+        return `<tr class="${roleClass}"><td class="room-cell">${escapeHtml(person.room || "—")}</td><td class="name-cell"><span class="resident-role-fullname">${personName}</span>${roleTag}</td></tr>`;
     }).join("");
     filterPublicResidents();
 }
@@ -2635,6 +2661,7 @@ const studentsSection = document.querySelector(".students-section:not(.history-s
 
 function syncDataTabsForRole() {
     const isAdmin = currentProfile?.role === "admin";
+    document.querySelector(".admin-tools-launcher-card")?.classList.toggle("hidden", !isAdmin);
     publicResidentsTab?.classList.toggle("hidden", isAdmin);
     publicResidentsSection?.classList.toggle("hidden", isAdmin || !publicResidentsTab?.classList.contains("active"));
     councilSection?.classList.toggle("hidden", !councilTab?.classList.contains("active"));
