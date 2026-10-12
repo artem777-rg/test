@@ -2452,7 +2452,7 @@ async function renderCouncilRoster() {
         list.innerHTML = '<div class="council-empty"><span>✦</span><strong>Совет пока формируется</strong><p>Здесь появятся назначенные участники.</p></div>';
         return;
     }
-    list.innerHTML = members.map((member, index) => `<article class="council-member-card council-tag-${index % 5}"><div class="council-member-avatar">${escapeHtml((member.full_name || "Ж").trim().charAt(0).toUpperCase())}</div><div class="council-member-details"><strong>${escapeHtml(member.full_name || "Без имени")}</strong><span>Комната ${escapeHtml(member.room || "—")}</span></div><span class="council-member-badge">✦ ${escapeHtml(member.tag || "Совет")}</span></article>`).join("");
+    list.innerHTML = members.map((member, index) => `<article class="council-member-card council-tag-${index % 5}"><div class="council-member-avatar">${escapeHtml((member.full_name || "Ж").trim().charAt(0).toUpperCase())}</div><div class="council-member-details"><strong class="council-member-name">${escapeHtml(member.full_name || "Без имени")}</strong>${member.nickname ? `<span class="council-member-nickname">@${escapeHtml(member.nickname)}</span>` : ""}<span>Комната ${escapeHtml(member.room || "—")}</span></div><span class="council-member-badge">✦ ${escapeHtml(member.tag || "Совет")}</span></article>`).join("");
 }
 
 async function renderCouncilAdmin() {
@@ -2517,7 +2517,7 @@ async function renderMoopRoster() {
     const { data, error } = await supabaseClient.rpc("get_public_moop_roster");
     if (error) { list.innerHTML = '<p class="empty-cell">Не удалось загрузить список. Администратору нужно выполнить файл moop_members.sql в Supabase.</p>'; return; }
     if (!data?.length) { list.innerHTML = '<div class="council-empty moop-empty"><span>●</span><strong>Представители МООП пока не добавлены</strong><p>Здесь появятся назначенные представители.</p></div>'; return; }
-    list.innerHTML = data.map((m, i) => `<article class="council-member-card moop-member-card"><div class="council-member-avatar">${escapeHtml((m.full_name || "Ж").trim().charAt(0).toUpperCase())}</div><div class="council-member-details"><strong>${escapeHtml(m.full_name || "Без имени")}</strong><span>Комната ${escapeHtml(m.room || "—")}</span></div><span class="council-member-badge moop-member-badge">● ${escapeHtml(m.tag || "МООП")}</span></article>`).join("");
+    list.innerHTML = data.map((m, i) => `<article class="council-member-card moop-member-card"><div class="council-member-avatar">${escapeHtml((m.full_name || "Ж").trim().charAt(0).toUpperCase())}</div><div class="council-member-details"><strong class="moop-member-name">${escapeHtml(m.full_name || "Без имени")}</strong>${m.nickname ? `<span class="moop-member-nickname">@${escapeHtml(m.nickname)}</span>` : ""}<span>Комната ${escapeHtml(m.room || "—")}</span></div><span class="council-member-badge moop-member-badge">● ${escapeHtml(m.tag || "МООП")}</span></article>`).join("");
 }
 async function renderMoopAdmin() {
     if (currentProfile?.role !== "admin") return;
@@ -2606,11 +2606,9 @@ const studentsSection = document.querySelector(".students-section:not(.history-s
 function syncDataTabsForRole() {
     const isAdmin = currentProfile?.role === "admin";
     publicResidentsTab?.classList.toggle("hidden", isAdmin);
-    councilTab?.classList.toggle("hidden", isAdmin);
-    moopTab?.classList.toggle("hidden", isAdmin);
     publicResidentsSection?.classList.toggle("hidden", isAdmin || !publicResidentsTab?.classList.contains("active"));
-    councilSection?.classList.toggle("hidden", isAdmin || !councilTab?.classList.contains("active"));
-    moopSection?.classList.toggle("hidden", isAdmin || !moopTab?.classList.contains("active"));
+    councilSection?.classList.toggle("hidden", !councilTab?.classList.contains("active"));
+    moopSection?.classList.toggle("hidden", !moopTab?.classList.contains("active"));
     const tabs = document.querySelector(".data-tabs");
     tabs?.classList.toggle("admin-data-tabs", isAdmin);
 }
@@ -2619,8 +2617,8 @@ function activateDataTab(tab) {
     const showResidents = tab === "residents";
     const showHistory = tab === "history";
     const showPublicResidents = tab === "publicResidents" && currentProfile?.role !== "admin";
-    const showCouncil = tab === "council" && currentProfile?.role !== "admin";
-    const showMoop = tab === "moop" && currentProfile?.role !== "admin";
+    const showCouncil = tab === "council";
+    const showMoop = tab === "moop";
     if (studentsSection) studentsSection.classList.toggle("hidden", !showResidents);
     if (historySection) historySection.classList.toggle("hidden", !showHistory);
     if (publicResidentsSection) publicResidentsSection.classList.toggle("hidden", !showPublicResidents);
