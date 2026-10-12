@@ -41,6 +41,8 @@ let currentProfile = null;
 
 let students = [];
 let workHours = [];
+let councilResidentIds = new Set();
+let moopResidentIds = new Set();
 let residentNotifications = [];
 let publicTasks = [];
 let notificationsChannel = null;
@@ -665,6 +667,7 @@ async function loadAllData() {
         loadWorkHours()
     ]);
 
+    await loadResidentRoleMemberships();
     renderStudents();
     await renderTopDormitory();
     renderAchievements();
@@ -894,6 +897,19 @@ async function loadStudents() {
 }
 
 
+/* Load Council/MOOP memberships so the residents table can highlight them. */
+async function loadResidentRoleMemberships() {
+    councilResidentIds = new Set();
+    moopResidentIds = new Set();
+    if (currentProfile?.role !== "admin") return;
+    const [councilResult, moopResult] = await Promise.all([
+        supabaseClient.from("council_members").select("student_id"),
+        supabaseClient.from("moop_members").select("student_id")
+    ]);
+    if (!councilResult.error) (councilResult.data || []).forEach(x => councilResidentIds.add(String(x.student_id)));
+    if (!moopResult.error) (moopResult.data || []).forEach(x => moopResidentIds.add(String(x.student_id)));
+}
+
 /* =========================================================
    LOAD WORK HOURS
 ========================================================= */
@@ -1102,16 +1118,22 @@ function renderStudents() {
 
         const row =
             document.createElement("tr");
-
+        const isMoop = moopResidentIds.has(String(student.id));
+        const isCouncil = councilResidentIds.has(String(student.id));
+        row.classList.add("resident-role-row");
+        if (isMoop) row.classList.add("resident-role-moop");
+        else if (isCouncil) row.classList.add("resident-role-council");
 
         row.innerHTML = `
 
             <td class="room-cell">
-                ${escapeHtml(student.room)}
+                ${escapeHtml(student.room || "—")}
             </td>
 
             <td class="name-cell">
-                ${escapeHtml(shortName)}
+                <span class="resident-role-fullname">${escapeHtml(shortName)}</span>
+                ${student.nickname ? `<span class="resident-role-nickname">@${escapeHtml(student.nickname)}</span>` : ""}
+                ${isMoop ? '<span class="resident-role-label">● МООП</span>' : isCouncil ? '<span class="resident-role-label">✦ Совет</span>' : ""}
             </td>
 
             <td class="hours-cell">
@@ -2496,6 +2518,8 @@ councilMemberForm?.addEventListener("submit", async event => {
     }
     if (message) message.textContent = "Участник Совета сохранён.";
     tagInput.value = "";
+    await loadResidentRoleMemberships();
+    renderStudents();
     await Promise.all([renderCouncilAdmin(), renderCouncilRoster()]);
 });
 
@@ -2506,6 +2530,8 @@ document.getElementById("councilAdminTableBody")?.addEventListener("click", asyn
     const message = document.getElementById("councilAdminMessage");
     if (error) { if (message) message.textContent = "Не удалось убрать участника Совета."; return; }
     if (message) message.textContent = "Участник удалён из Совета.";
+    await loadResidentRoleMemberships();
+    renderStudents();
     await Promise.all([renderCouncilAdmin(), renderCouncilRoster()]);
 });
 
@@ -2540,6 +2566,8 @@ moopMemberForm?.addEventListener("submit", async event => {
     if (error) { if (message) message.textContent = "Не удалось сохранить. Проверьте, что выполнен moop_members.sql."; console.error(error); return; }
     if (message) message.textContent = "Представитель МООП добавлен.";
     document.getElementById("moopMemberTag").value = "";
+    await loadResidentRoleMemberships();
+    renderStudents();
     await Promise.all([renderMoopAdmin(), renderMoopRoster()]);
 });
 document.getElementById("moopAdminTableBody")?.addEventListener("click", async event => {
@@ -2547,6 +2575,8 @@ document.getElementById("moopAdminTableBody")?.addEventListener("click", async e
     const { error } = await supabaseClient.from("moop_members").delete().eq("student_id", button.dataset.moopRemove);
     const message = document.getElementById("moopAdminMessage"); if (error) { if (message) message.textContent = "Не удалось убрать представителя МООП."; return; }
     if (message) message.textContent = "Представитель удалён из МООП.";
+    await loadResidentRoleMemberships();
+    renderStudents();
     await Promise.all([renderMoopAdmin(), renderMoopRoster()]);
 });
 
