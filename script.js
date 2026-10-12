@@ -3564,9 +3564,19 @@ if(accountSettingsBtn){
     const target = view === "tasks" ? workspace.querySelector(".tasks-card") : workspace.querySelector(".notifications-card");
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  const collapseBtn = document.getElementById("residentMobileCollapseBtn");
+  collapseBtn?.addEventListener("click", () => {
+    const collapsed = workspace.classList.toggle("resident-mobile-panels-collapsed");
+    collapseBtn.textContent = collapsed ? "↕ Развернуть" : "↕ Свернуть";
+    collapseBtn.setAttribute("aria-expanded", String(!collapsed));
+  });
   nav.addEventListener("click", event => {
     const button = event.target.closest("[data-mobile-view]");
-    if (button) setView(button.dataset.mobileView);
+    if (button) {
+      workspace.classList.remove("resident-mobile-panels-collapsed");
+      if (collapseBtn) { collapseBtn.textContent = "↕ Свернуть"; collapseBtn.setAttribute("aria-expanded", "true"); }
+      setView(button.dataset.mobileView);
+    }
   });
   workspace.dataset.mobileView = "notifications";
 })();
