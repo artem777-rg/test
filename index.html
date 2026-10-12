@@ -253,6 +253,15 @@
                     </section>
                 </section>
 
+                <!-- Разделы жильцов — в одном ряду сразу под уведомлениями и бронированием -->
+                <div class="data-tabs resident-top-data-tabs" role="tablist" aria-label="Разделы данных">
+                    <button type="button" class="data-tab active" id="residentsTab" role="tab" aria-selected="true">👥 Жильцы</button>
+                    <button type="button" class="data-tab" id="publicResidentsTab" role="tab" aria-selected="false">🏠 Все жильцы</button>
+                    <button type="button" class="data-tab" id="councilTab" role="tab" aria-selected="false">🌸 Совет общежития</button>
+                    <button type="button" class="data-tab" id="moopTab" role="tab" aria-selected="false">🔴 Представители МООП</button>
+                    <button type="button" class="data-tab" id="historyTab" role="tab" aria-selected="false">📜 История начислений</button>
+                </div>
+
             <!-- ЛИЧНАЯ СТАТИСТИКА ЖИЛЬЦА -->
             <section id="studentPersonalStats" class="student-stats-card hidden" aria-labelledby="studentStatsTitle">
                 <div class="student-stats-heading">
@@ -731,15 +740,6 @@
                             </div>
                         </div>
                     </section>
-                </div>
-
-                <!-- Переключатели разделов расположены непосредственно у списка жильцов -->
-                <div class="data-tabs" role="tablist" aria-label="Разделы данных">
-                    <button type="button" class="data-tab active" id="residentsTab" role="tab" aria-selected="true">👥 Жильцы</button>
-                    <button type="button" class="data-tab" id="publicResidentsTab" role="tab" aria-selected="false">🏠 Все жильцы</button>
-                    <button type="button" class="data-tab" id="councilTab" role="tab" aria-selected="false">🏛️ Совет общежития</button>
-                    <button type="button" class="data-tab" id="moopTab" role="tab" aria-selected="false">🔴 Представители МООП</button>
-                    <button type="button" class="data-tab" id="historyTab" role="tab" aria-selected="false">📜 История начислений</button>
                 </div>
 
                 <!-- ================= STUDENTS ================= -->
