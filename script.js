@@ -43,6 +43,8 @@ let students = [];
 let workHours = [];
 let councilResidentIds = new Set();
 let moopResidentIds = new Set();
+let councilMemberTags = new Map();
+let moopMemberTags = new Map();
 let residentNotifications = [];
 let publicTasks = [];
 let notificationsChannel = null;
@@ -901,13 +903,30 @@ async function loadStudents() {
 async function loadResidentRoleMemberships() {
     councilResidentIds = new Set();
     moopResidentIds = new Set();
-    // Membership is readable by every authenticated resident; use it for student-facing highlighting too.
+    councilMemberTags = new Map();
+    moopMemberTags = new Map();
+
+    // Загружаем роли вместе с тегами, созданными администратором.
     const [councilResult, moopResult] = await Promise.all([
-        supabaseClient.from("council_members").select("student_id"),
-        supabaseClient.from("moop_members").select("student_id")
+        supabaseClient.from("council_members").select("student_id, tag"),
+        supabaseClient.from("moop_members").select("student_id, tag")
     ]);
-    if (!councilResult.error) (councilResult.data || []).forEach(x => councilResidentIds.add(String(x.student_id)));
-    if (!moopResult.error) (moopResult.data || []).forEach(x => moopResidentIds.add(String(x.student_id)));
+
+    if (!councilResult.error) {
+        (councilResult.data || []).forEach(x => {
+            const id = String(x.student_id);
+            councilResidentIds.add(id);
+            councilMemberTags.set(id, x.tag || "Совет");
+        });
+    }
+
+    if (!moopResult.error) {
+        (moopResult.data || []).forEach(x => {
+            const id = String(x.student_id);
+            moopResidentIds.add(id);
+            moopMemberTags.set(id, x.tag || "МООП");
+        });
+    }
 }
 
 /* =========================================================
@@ -1134,7 +1153,7 @@ function renderStudents() {
 
             <td class="name-cell">
                 <span class="resident-role-fullname">${escapeHtml(shortName)}</span>
-                ${student.nickname ? `<span class="resident-role-nickname">@${escapeHtml(student.nickname)}</span>` : ""}
+                
                 ${isMoop ? `<span class="resident-role-label">● ${escapeHtml(moopTag)}</span>` : isCouncil ? `<span class="resident-role-label">✦ ${escapeHtml(councilTag)}</span>` : ""}
             </td>
 
@@ -2393,9 +2412,6 @@ function renderHistory() {
 /* =========================================================
    PUBLIC RESIDENT ROSTER (names + room only)
 ========================================================= */
-let moopMemberTags = new Map();
-let councilMemberTags = new Map();
-
 async function renderPublicResidents() {
     const body = document.getElementById("publicResidentsTableBody");
     if (!body) return;
@@ -3934,3 +3950,9 @@ if(accountSettingsBtn){
     if (event.key === 'Escape' && !modal.classList.contains('hidden')) close();
   });
 })();
+
+
+/* FINAL FIX - COUNCIL/MOOP TAG FALLBACK */
+function getMemberTag(member) {
+    return member?.tag || member?.position || member?.title || member?.role_name || "";
+}
