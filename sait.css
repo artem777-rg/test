@@ -2423,3 +2423,25 @@ body.admin-tools-modal-open { overflow: hidden; }
 .moop-section .moop-member-nickname { font-weight: 800; }
 .moop-section .moop-member-card:before { background: linear-gradient(#ff3b45,#b51224); }
 .moop-section .moop-member-card .council-member-avatar { background: linear-gradient(135deg,#e11d2e,#ff6872); }
+
+/* Role colors in the residents list: MOOP takes priority over Council. */
+#studentsTableBody tr.resident-role-moop > td { background: rgba(239, 48, 61, .10); }
+#studentsTableBody tr.resident-role-council > td { background: rgba(239, 103, 174, .12); }
+#studentsTableBody tr.resident-role-moop > td:first-child { box-shadow: inset 4px 0 #ef303d; }
+#studentsTableBody tr.resident-role-council > td:first-child { box-shadow: inset 4px 0 #ed75b4; }
+#studentsTableBody .resident-role-fullname,
+#studentsTableBody .resident-role-nickname { display: block; font-weight: 800; }
+#studentsTableBody .resident-role-nickname { margin-top: 3px; font-size: .84em; opacity: .95; overflow-wrap: anywhere; }
+#studentsTableBody .resident-role-label { display: inline-flex; margin-top: 5px; padding: 2px 7px; border-radius: 999px; font-size: .72em; font-weight: 900; }
+#studentsTableBody tr.resident-role-moop .resident-role-fullname,
+#studentsTableBody tr.resident-role-moop .resident-role-nickname,
+#studentsTableBody tr.resident-role-moop .resident-role-label { color: #ff3d4c !important; }
+#studentsTableBody tr.resident-role-moop .resident-role-label { background: rgba(255, 50, 65, .14); }
+#studentsTableBody tr.resident-role-council .resident-role-fullname,
+#studentsTableBody tr.resident-role-council .resident-role-nickname,
+#studentsTableBody tr.resident-role-council .resident-role-label { color: #ed75b4 !important; }
+#studentsTableBody tr.resident-role-council .resident-role-label { background: rgba(237, 117, 180, .15); }
+@media (min-width: 681px) and (max-width: 1050px) {
+  .global-ranking-card + .resident-workspace { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .global-ranking-card + .resident-workspace .achievements-launcher-card { grid-column: auto; }
+}
