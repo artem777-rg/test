@@ -2461,6 +2461,8 @@ function activateNotificationChannel(channel) {
 }
 siteNotificationsTab?.addEventListener("click", () => activateNotificationChannel("site"));
 telegramNotificationsTab?.addEventListener("click", () => activateNotificationChannel("telegram"));
+// По умолчанию при каждом открытии/обновлении сайта показываем Telegram.
+activateNotificationChannel("telegram");
 
 const historyTab = document.getElementById("historyTab");
 const publicResidentsTab = document.getElementById("publicResidentsTab");
