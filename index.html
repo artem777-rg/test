@@ -240,6 +240,12 @@
                         </div>
                         <div id="residentTasksList" class="resident-tasks-list"><p class="muted">Загрузка заданий…</p></div>
                     </div>
+                    <div class="admin-card admin-tools-launcher-card">
+                        <h2>🛠️ Все функции администратора</h2>
+                        <p class="section-description">Управление жильцами, часами и Советом собрано в одной панели.</p>
+                        <button type="button" id="openAdminTools" class="btn btn-primary">Открыть панель управления</button>
+                    </div>
+
                     <section id="residentExtrasLauncher" class="resident-extras-launcher achievements-launcher-card hidden">
                         <div class="resident-extra-launcher-copy"><span class="resident-extra-kicker">ТВОИ РЕЗУЛЬТАТЫ</span><h2>🎖️ Достижения и бонусы</h2><p>Открывай награды за выполненные часы и следи за прогрессом.</p></div>
                         <button type="button" id="openResidentExtras" class="btn btn-primary">Открыть достижения</button>
@@ -309,27 +315,6 @@
                 <!-- ================= ADMIN ================= -->
 
                 <section id="adminPanel" class="admin-panel hidden">
-
-                    <div class="section-title">
-                        <span>⚙️</span>
-                        Панель администратора
-                    </div>
-
-
-                    <div class="admin-card publish-task-card">
-                        <h2>📣 Опубликовать задание для бронирования</h2>
-                        <p class="section-description">Задание появится у жильцов в списке свободных работ.</p>
-                        <form id="publishTaskForm" class="form-grid">
-                            <div class="form-group"><label for="publicTaskTitle">Название задания</label><input id="publicTaskTitle" maxlength="100" placeholder="Например: уборка кухни" required></div>
-                            <div class="form-group"><label for="publicTaskHours">Часы</label><input id="publicTaskHours" type="number" min="0.5" step="0.5" value="2" required></div>
-                            <div class="form-group"><label for="publicTaskCapacity">Сколько жильцов могут забронировать</label><input id="publicTaskCapacity" type="number" min="1" max="100" step="1" value="1" required><small class="field-hint">Каждому участнику будут зачтены часы задания.</small></div>
-                            <div class="form-group"><label for="publicTaskDetails">Описание / место / комментарий</label><input id="publicTaskDetails" maxlength="500" placeholder="Например: кухня на 3 этаже"></div>
-                            <div class="form-group"><label for="publicTaskDate">Дата выполнения (необязательно)</label><input id="publicTaskDate" type="date"></div>
-                            <div class="form-group"><label for="publicTaskTime">Время выполнения (необязательно)</label><input id="publicTaskTime" type="time"></div>
-                            <div class="form-group form-full"><button class="btn btn-primary" type="submit">Опубликовать задание</button></div>
-                        </form>
-                        <div id="publishTaskMessage" class="form-message"></div>
-                    </div>
 
                     <div class="admin-card council-admin-card">
                         <h2>🏛️ Управление Советом общежития</h2>
@@ -681,6 +666,51 @@
 
                 </section>
 
+                <div id="adminToolsModal" class="admin-tools-modal hidden" aria-hidden="true">
+                    <div class="admin-tools-backdrop" data-close-admin-tools></div>
+                    <section class="admin-tools-dialog" role="dialog" aria-modal="true" aria-labelledby="adminToolsTitle">
+                        <header class="admin-tools-modal-header">
+                            <div><span class="admin-tools-eyebrow">АДМИНИСТРИРОВАНИЕ</span><h2 id="adminToolsTitle">🛠️ Панель управления</h2></div>
+                            <button type="button" id="closeAdminTools" class="btn btn-secondary" aria-label="Закрыть панель управления">Закрыть ✕</button>
+                        </header>
+                        <nav class="admin-tools-tabs" role="tablist" aria-label="Функции администратора">
+                            <button type="button" class="admin-tools-tab active" role="tab" aria-selected="true" data-admin-tool-tab="residents">➕ Жильцы</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="assign">📋 Назначить часы</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="complete">✅ Выполнение</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="council">🏛️ Совет</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="publish">📣 Задания</button>
+                        </nav>
+                        <div class="admin-tools-tab-content" id="adminToolsResidentsPane" data-admin-tool-pane="residents"></div>
+                        <div class="admin-tools-tab-content hidden" id="adminToolsAssignPane" data-admin-tool-pane="assign"></div>
+                        <div class="admin-tools-tab-content hidden" id="adminToolsCompletePane" data-admin-tool-pane="complete"></div>
+                        <div class="admin-tools-tab-content hidden" id="adminToolsCouncilPane" data-admin-tool-pane="council"></div>
+                        <div class="admin-tools-tab-content hidden" id="adminToolsPublishPane" data-admin-tool-pane="publish">
+                    <div class="admin-card publish-task-card">
+                        <h2>📣 Опубликовать задание для бронирования</h2>
+                        <p class="section-description">Задание появится у жильцов в списке свободных работ.</p>
+                        <form id="publishTaskForm" class="form-grid">
+                            <div class="form-group"><label for="publicTaskTitle">Название задания</label><input id="publicTaskTitle" maxlength="100" placeholder="Например: уборка кухни" required></div>
+                            <div class="form-group"><label for="publicTaskHours">Часы</label><input id="publicTaskHours" type="number" min="0.5" step="0.5" value="2" required></div>
+                            <div class="form-group"><label for="publicTaskCapacity">Сколько жильцов могут забронировать</label><input id="publicTaskCapacity" type="number" min="1" max="100" step="1" value="1" required><small class="field-hint">Каждому участнику будут зачтены часы задания.</small></div>
+                            <div class="form-group"><label for="publicTaskDetails">Описание / место / комментарий</label><input id="publicTaskDetails" maxlength="500" placeholder="Например: кухня на 3 этаже"></div>
+                            <div class="form-group"><label for="publicTaskDate">Дата выполнения (необязательно)</label><input id="publicTaskDate" type="date"></div>
+                            <div class="form-group"><label for="publicTaskTime">Время выполнения (необязательно)</label><input id="publicTaskTime" type="time"></div>
+                            <div class="form-group form-full"><button class="btn btn-primary" type="submit">Опубликовать задание</button></div>
+                        </form>
+                        <div id="publishTaskMessage" class="form-message"></div>
+                    </div>
+
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Переключатели разделов расположены непосредственно у списка жильцов -->
+                <div class="data-tabs" role="tablist" aria-label="Разделы данных">
+                    <button type="button" class="data-tab active" id="residentsTab" role="tab" aria-selected="true">👥 Жильцы</button>
+                    <button type="button" class="data-tab" id="publicResidentsTab" role="tab" aria-selected="false">🏠 Все жильцы</button>
+                    <button type="button" class="data-tab" id="councilTab" role="tab" aria-selected="false">🏛️ Совет общежития</button>
+                    <button type="button" class="data-tab" id="historyTab" role="tab" aria-selected="false">📜 История начислений</button>
+                </div>
 
                 <!-- ================= STUDENTS ================= -->
 
@@ -759,6 +789,8 @@
                                         КОЛ-ВО ЧАСОВ
                                     </th>
 
+                                    <th class="resident-actions-heading" aria-label="Действия"></th>
+
                                 </tr>
 
                             </thead>
@@ -771,13 +803,6 @@
                     </div>
 
                 </section>
-
-                <div class="data-tabs" role="tablist" aria-label="Разделы данных">
-                    <button type="button" class="data-tab active" id="residentsTab" role="tab" aria-selected="true">👥 Жильцы</button>
-                    <button type="button" class="data-tab" id="publicResidentsTab" role="tab" aria-selected="false">🏠 Все жильцы</button>
-                    <button type="button" class="data-tab" id="councilTab" role="tab" aria-selected="false">🏛️ Совет общежития</button>
-                    <button type="button" class="data-tab" id="historyTab" role="tab" aria-selected="false">📜 История начислений</button>
-                </div>
 
                 <section id="publicResidentsSection" class="students-section public-residents-section hidden" aria-labelledby="publicResidentsTab">
                     <div class="history-header history-header-collapsible"><div><h2>Жильцы общежития</h2><p class="section-description">Список комнат и жильцов. Часы и личные данные не отображаются.</p></div><button type="button" id="publicResidentsCollapseToggle" class="btn btn-secondary history-collapse-toggle" aria-expanded="true"><span id="publicResidentsCollapseLabel">Свернуть</span> <span id="publicResidentsCollapseIcon" aria-hidden="true">▲</span></button></div>
@@ -812,6 +837,11 @@
                             </button>
                         </div>
                         <div id="historyCollapsibleContent">
+                        <div class="history-search-row">
+                            <input type="search" id="historySearch" class="history-search-input" placeholder="Поиск по жильцу, комнате, причине или типу…" aria-label="Поиск по истории начислений">
+                            <button type="button" id="historySearchClear" class="btn btn-secondary hidden">Очистить</button>
+                            <span id="historySearchInfo" class="history-search-info" aria-live="polite">Всего записей: 0</span>
+                        </div>
                         <div class="table-wrapper">
 
                             <table id="historyTable">
