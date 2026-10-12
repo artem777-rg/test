@@ -328,6 +328,18 @@
                         <div class="table-wrapper"><table><thead><tr><th>ЖИЛЕЦ</th><th>ТЕГ</th><th>ДЕЙСТВИЕ</th></tr></thead><tbody id="councilAdminTableBody"><tr><td colspan="3" class="empty-cell">Загрузите список Совета</td></tr></tbody></table></div>
                     </div>
 
+                    <div class="admin-card moop-admin-card">
+                        <h2>🔴 Добавление МООП</h2>
+                        <p class="section-description">Выбери жильца и укажи тег или должность представителя МООП.</p>
+                        <form id="moopMemberForm" class="form-grid">
+                            <div class="form-group"><label for="moopStudentSelect">Жилец</label><select id="moopStudentSelect" required><option value="">Выбери жильца</option></select></div>
+                            <div class="form-group"><label for="moopMemberTag">Тег / должность</label><input id="moopMemberTag" maxlength="40" placeholder="Например: Представитель МООП" required></div>
+                            <div class="form-group form-full"><button class="btn btn-primary" type="submit">Добавить в МООП</button></div>
+                        </form>
+                        <div id="moopAdminMessage" class="form-message" aria-live="polite"></div>
+                        <div class="table-wrapper"><table><thead><tr><th>ЖИЛЕЦ</th><th>ТЕГ</th><th>ДЕЙСТВИЕ</th></tr></thead><tbody id="moopAdminTableBody"><tr><td colspan="3" class="empty-cell">Загрузите список представителей МООП</td></tr></tbody></table></div>
+                    </div>
+
                     <!-- ADD STUDENT -->
 
                     <div class="admin-card">
@@ -678,12 +690,15 @@
                             <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="assign">📋 Назначить часы</button>
                             <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="complete">✅ Выполнение</button>
                             <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="council">🏛️ Совет</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="moop">🔴 Представители МООП</button>
                             <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="publish">📣 Задания</button>
+                            <button type="button" class="admin-tools-tab" role="tab" aria-selected="false" data-admin-tool-tab="events">📢 Мероприятия</button>
                         </nav>
                         <div class="admin-tools-tab-content" id="adminToolsResidentsPane" data-admin-tool-pane="residents"></div>
                         <div class="admin-tools-tab-content hidden" id="adminToolsAssignPane" data-admin-tool-pane="assign"></div>
                         <div class="admin-tools-tab-content hidden" id="adminToolsCompletePane" data-admin-tool-pane="complete"></div>
                         <div class="admin-tools-tab-content hidden" id="adminToolsCouncilPane" data-admin-tool-pane="council"></div>
+                        <div class="admin-tools-tab-content hidden" id="adminToolsMoopPane" data-admin-tool-pane="moop"></div>
                         <div class="admin-tools-tab-content hidden" id="adminToolsPublishPane" data-admin-tool-pane="publish">
                     <div class="admin-card publish-task-card">
                         <h2>📣 Опубликовать задание для бронирования</h2>
@@ -701,6 +716,20 @@
                     </div>
 
                         </div>
+                        <div class="admin-tools-tab-content hidden" data-admin-tool-pane="events">
+                            <div class="admin-card publish-event-card">
+                                <h2>📢 Опубликовать мероприятие</h2>
+                                <p class="section-description">Мероприятие появится в уведомлениях на сайте и будет отправлено в Telegram жильцам, которые подключили бота.</p>
+                                <form id="publishEventForm" class="form-grid">
+                                    <div class="form-group form-full"><label for="eventTitle">Название мероприятия</label><input id="eventTitle" maxlength="120" placeholder="Например: Совет общежития" required></div>
+                                    <div class="form-group"><label for="eventDate">Дата</label><input id="eventDate" type="date" required></div>
+                                    <div class="form-group"><label for="eventTime">Время</label><input id="eventTime" type="time" required value="19:00"></div>
+                                    <div class="form-group form-full"><label for="eventDetails">Дополнительная информация</label><textarea id="eventDetails" rows="3" maxlength="1000" placeholder="Например: явка всем, место проведения — актовый зал"></textarea></div>
+                                    <div class="form-group form-full"><button class="btn btn-primary" type="submit">Опубликовать и уведомить всех</button></div>
+                                </form>
+                                <div id="publishEventMessage" class="form-message" role="status" aria-live="polite"></div>
+                            </div>
+                        </div>
                     </section>
                 </div>
 
@@ -709,6 +738,7 @@
                     <button type="button" class="data-tab active" id="residentsTab" role="tab" aria-selected="true">👥 Жильцы</button>
                     <button type="button" class="data-tab" id="publicResidentsTab" role="tab" aria-selected="false">🏠 Все жильцы</button>
                     <button type="button" class="data-tab" id="councilTab" role="tab" aria-selected="false">🏛️ Совет общежития</button>
+                    <button type="button" class="data-tab" id="moopTab" role="tab" aria-selected="false">🔴 Представители МООП</button>
                     <button type="button" class="data-tab" id="historyTab" role="tab" aria-selected="false">📜 История начислений</button>
                 </div>
 
@@ -822,6 +852,11 @@
                 <section id="councilSection" class="students-section council-section hidden" aria-labelledby="councilTab">
                     <div class="council-intro"><span class="council-emblem">✦</span><div><h2>Совет общежития</h2><p>Знакомьтесь с участниками Совета и их ролями в жизни общежития.</p></div></div>
                     <div id="councilRosterList" class="council-roster-list"><p class="empty-cell">Загружаем состав Совета…</p></div>
+                </section>
+
+                <section id="moopSection" class="students-section moop-section hidden" aria-labelledby="moopTab">
+                    <div class="council-intro moop-intro"><span class="council-emblem">●</span><div><h2>Представители МООП</h2><p>Список представителей МООП общежития.</p></div></div>
+                    <div id="moopRosterList" class="council-roster-list"><p class="empty-cell">Загружаем список представителей МООП…</p></div>
                 </section>
 
                 <section id="historySection" class="students-section history-section hidden" aria-labelledby="historyTab">
