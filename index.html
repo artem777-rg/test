@@ -203,6 +203,14 @@
 
                 <!-- УВЕДОМЛЕНИЯ И ЗАДАНИЯ ДЛЯ ЖИЛЬЦОВ -->
                 <section class="resident-workspace">
+                    <nav class="resident-mobile-nav" id="residentMobileNav" aria-label="Быстрые разделы жильца">
+                        <button type="button" class="resident-mobile-nav-trigger" id="residentMobileNavTrigger" aria-expanded="false" aria-controls="residentMobileNavOptions">☰ Разделы <span aria-hidden="true">▾</span></button>
+                        <div class="resident-mobile-nav-options hidden" id="residentMobileNavOptions">
+                            <button type="button" class="resident-mobile-nav-btn active" data-mobile-view="notifications" aria-pressed="true">🔔 Уведомления</button>
+                            <button type="button" class="resident-mobile-nav-btn" data-mobile-view="tasks" aria-pressed="false">🧰 Бронирование</button>
+                            <button type="button" class="resident-mobile-nav-btn" data-mobile-view="achievements" aria-pressed="false">🏅 Достижения</button>
+                        </div>
+                    </nav>
                     <div class="workspace-card notifications-card">
                         <div class="workspace-heading">
                             <div><h2>🔔 Уведомления</h2><p>Уведомления сайта и подключение Telegram</p></div>
@@ -243,7 +251,7 @@
             <!-- ЛИЧНАЯ СТАТИСТИКА ЖИЛЬЦА -->
             <section id="studentPersonalStats" class="student-stats-card hidden" aria-labelledby="studentStatsTitle">
                 <div class="student-stats-heading">
-                    <div><p class="student-stats-kicker">МОЯ СТАТИСТИКА</p><h2 id="studentStatsTitle">Мой прогресс</h2><p>Твои часы за всё время и за текущий месяц</p></div>
+                    <div><p class="student-stats-kicker">МОЯ СТАТИСТИКА</p><h2 id="studentStatsTitle">Моя статистика</h2><p>Твои часы за всё время и за текущий месяц</p></div>
                     <div class="student-stats-icon">📊</div>
                 </div>
                 <div class="student-stats-grid">
