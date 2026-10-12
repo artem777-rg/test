@@ -2176,11 +2176,3 @@ body.theme-rose .resident-task-card {
   .resident-workspace[data-mobile-view="achievements"]>.achievements-launcher-card{display:none!important}
 }
 
-/* Mobile-only collapse control for resident quick panels */
-@media(max-width:600px){
-  .resident-mobile-nav-options{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .resident-mobile-collapse-btn{border-color:var(--border-color,rgba(140,155,190,.3));background:var(--panel-bg,rgba(120,130,150,.08))}
-  .resident-workspace.resident-mobile-panels-collapsed .notifications-card,
-  .resident-workspace.resident-mobile-panels-collapsed .tasks-card,
-  .resident-workspace.resident-mobile-panels-collapsed .achievements-launcher-card{display:none!important}
-}
