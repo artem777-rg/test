@@ -3538,14 +3538,12 @@ if(accountSettingsBtn){
 })();
 
 
-/* Mobile quick navigation: one button opens a menu of resident panels */
+/* Mobile resident panel switcher: three buttons in one compact panel */
 (function setupResidentMobileNav(){
   const nav = document.getElementById("residentMobileNav");
   const workspace = document.querySelector(".resident-workspace");
-  const trigger = document.getElementById("residentMobileNavTrigger");
   const options = document.getElementById("residentMobileNavOptions");
-  if (!nav || !workspace || !trigger || !options) return;
-  function closeMenu(){ options.classList.add("hidden"); trigger.setAttribute("aria-expanded","false"); }
+  if (!nav || !workspace || !options) return;
   function setView(view) {
     workspace.dataset.mobileView = view;
     nav.querySelectorAll("[data-mobile-view]").forEach(btn => {
@@ -3553,31 +3551,23 @@ if(accountSettingsBtn){
       btn.classList.toggle("active", active);
       btn.setAttribute("aria-pressed", String(active));
     });
-    closeMenu();
+    const extrasPanel = document.getElementById("residentExtrasPanel");
     if (view === "achievements") {
-      const panel = document.getElementById("residentExtrasPanel");
-      if (currentProfile?.role !== "admin" && panel) {
-        panel.classList.remove("hidden");
+      if (currentProfile?.role !== "admin" && extrasPanel) {
+        extrasPanel.classList.remove("hidden");
         document.getElementById("achievementsTab")?.click();
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        extrasPanel.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       return;
     }
-    document.getElementById("residentExtrasPanel")?.classList.add("hidden");
+    extrasPanel?.classList.add("hidden");
     const target = view === "tasks" ? workspace.querySelector(".tasks-card") : workspace.querySelector(".notifications-card");
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  trigger.addEventListener("click", () => {
-    const opening = options.classList.contains("hidden");
-    options.classList.toggle("hidden", !opening);
-    trigger.setAttribute("aria-expanded", String(opening));
-  });
   nav.addEventListener("click", event => {
     const button = event.target.closest("[data-mobile-view]");
     if (button) setView(button.dataset.mobileView);
   });
-  document.addEventListener("click", event => { if (!nav.contains(event.target)) closeMenu(); });
-  document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
   workspace.dataset.mobileView = "notifications";
 })();
 
